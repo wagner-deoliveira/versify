@@ -4,38 +4,46 @@ mod mappings;
 use regex::Regex;
 use std::fs::File;
 use std::{fs, io};
-use std::io::Read;
+use std::collections::HashMap;
+use std::io::{Read, Write};
 use std::process::exit;
 use clap::Parser;
 use args::VersifyArgs;
 use crate::mappings::App;
 
-fn replace_version<'a>(file: &'a String, domain_app: &'a str, version_to_change: &'a str) -> io::Result<()> {
-    let binding = Regex::new(&domain_app).unwrap();
-    let app = binding.as_str();
-    let mut modified_file = String::new();
-
+fn replace_version<'a>(file: &'a String, map: HashMap<&str, &str>) -> io::Result<()> {
     fs::create_dir_all("output")?;
     let output_file_path = "output/packages.txt";
+    let mut modified_file = String::new();
 
-    match app.parse::<App>() {
-        Ok(x) => {
-            for line in file.lines() {
-                let domain_space = mappings::inspect_app(x);
-                let mut modified_line = line.to_string();
+    for (key, value) in &map {
+        modified_file = String::new();
+        let binding = Regex::new(&key).unwrap();
+        let app = binding.as_str();
 
-                let binding_args = Regex::new(r":(main/latest|\d+(\.\d+){0,3})");
+        match app.parse::<App>() {
+            Ok(x) => {
+                for line in file.lines() {
+                    let domain_space = mappings::inspect_app(x);
+                    let mut modified_line = line.to_string();
 
-                if domain_space.contains(&line) {
-                    if binding_args.expect("REASON").is_match(&modified_line) {
-                        modified_line = modified_line.replace(":main/latest", &format!(":{}", version_to_change));
+                    let binding_args = Regex::new(r":(main/latest|\d+(\.\d+){0,3})");
+
+                    if domain_space.contains(&line) {
+                        if binding_args.expect("REASON").is_match(&modified_line) {
+                            modified_line = modified_line.replace(":main/latest", &format!(":{:}", &value));
+                        }
+                    }
+
+                    if line != modified_file{
+                        modified_file.push_str(&modified_line);
+                        modified_file.push('\n');
                     }
                 }
-                modified_file.push_str(&modified_line);
-                modified_file.push('\n');
             }
+            Err(_) => println!("Invalid value")
         }
-        Err(_) => println!("Invalid value")
+
     }
 
     fs::write(output_file_path, &modified_file).expect("Unable to write to output file");
@@ -56,7 +64,7 @@ fn read_file(path_to_file: &str) -> String {
 }
 
 
-fn main() {
+fn main() -> std::io::Result<()> {
     let args = VersifyArgs::parse();
     let path = args.path;
     let domains = args.domain;
@@ -65,11 +73,21 @@ fn main() {
     let domain_list: Vec<&str> = domains.split(",").collect();
     let version_list: Vec<&str> = versions.split(",").collect();
 
+    if domain_list.len() != version_list.len() {
+        return Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Domain_list and version_list have different sizes. \
+            Make sure to enter the same number of domains and versions",
+        ))
+    };
+
     let file = read_file(&*path);
 
-    let domain_app = domain_list.get(0).unwrap();
+    let version_mapping: HashMap<&str, &str> = domain_list.clone().into_iter().zip(version_list.clone().into_iter()).collect();
 
-    for v in version_list.iter() {
-        println!("{:?}", replace_version(&file, domain_app, v));
+    for (key, value) in &version_mapping {
+        println!("{key}: {value}");
     }
+
+    replace_version(&file, version_mapping)
 }
