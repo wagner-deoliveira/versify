@@ -15,15 +15,16 @@ fn replace_version<'a>(file: &'a String, domain_app: &'a str, version_to_change:
     let app = binding.as_str();
     let mut modified_file = String::new();
 
-    let output_file = File::create("output_file.txt")?;
+    fs::create_dir_all("output")?;
+    let output_file_path = "output/packages.txt";
 
     match app.parse::<App>() {
         Ok(x) => {
-            for mut line in file.lines() {
-                let mut domain_space = mappings::inspect_app(x);
+            for line in file.lines() {
+                let domain_space = mappings::inspect_app(x);
                 let mut modified_line = line.to_string();
 
-                let mut binding_args = Regex::new(r":(main/latest|\d+(\.\d+){0,3})");
+                let binding_args = Regex::new(r":(main/latest|\d+(\.\d+){0,3})");
 
                 if domain_space.contains(&line) {
                     if binding_args.expect("REASON").is_match(&modified_line) {
@@ -37,7 +38,7 @@ fn replace_version<'a>(file: &'a String, domain_app: &'a str, version_to_change:
         Err(_) => println!("Invalid value")
     }
 
-    fs::write("output_file.txt", &modified_file).expect("Unable to write to output file");
+    fs::write(output_file_path, &modified_file).expect("Unable to write to output file");
 
     Ok(())
 }
