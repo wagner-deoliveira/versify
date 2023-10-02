@@ -5,7 +5,7 @@ use regex::Regex;
 use std::fs::File;
 use std::{fs, io};
 use std::collections::HashMap;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::process::exit;
 use clap::Parser;
 use args::VersifyArgs;
@@ -35,7 +35,7 @@ fn replace_version<'a>(file: &'a String, map: HashMap<&str, &str>) -> io::Result
                         }
                     }
 
-                    if line != modified_file{
+                    if line != modified_file {
                         modified_file.push_str(&modified_line);
                         modified_file.push('\n');
                     }
@@ -43,7 +43,6 @@ fn replace_version<'a>(file: &'a String, map: HashMap<&str, &str>) -> io::Result
             }
             Err(_) => println!("Invalid value")
         }
-
     }
 
     fs::write(output_file_path, &modified_file).expect("Unable to write to output file");
@@ -78,16 +77,11 @@ fn main() -> std::io::Result<()> {
             io::ErrorKind::Other,
             "Domain_list and version_list have different sizes. \
             Make sure to enter the same number of domains and versions",
-        ))
+        ));
     };
-
-    let file = read_file(&*path);
 
     let version_mapping: HashMap<&str, &str> = domain_list.clone().into_iter().zip(version_list.clone().into_iter()).collect();
 
-    for (key, value) in &version_mapping {
-        println!("{key}: {value}");
-    }
-
+    let file = read_file(&*path);
     replace_version(&file, version_mapping)
 }
