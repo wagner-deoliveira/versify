@@ -11,13 +11,12 @@ use clap::Parser;
 use args::VersifyArgs;
 use crate::mappings::App;
 
-fn replace_version<'a>(file: &'a String, map: HashMap<&str, &str>) -> io::Result<()> {
+fn replace_version(file: &String, map: HashMap<&str, &str>) -> io::Result<()> {
     fs::create_dir_all("output")?;
     let output_file_path = "output/packages.txt";
     let mut modified_file = String::new();
 
     for (key, value) in &map {
-        modified_file = String::new();
         let binding = Regex::new(&key).unwrap();
         let app = binding.as_str();
 
@@ -41,7 +40,7 @@ fn replace_version<'a>(file: &'a String, map: HashMap<&str, &str>) -> io::Result
                     }
                 }
             }
-            Err(_) => println!("Invalid value")
+            Err(_) => println!("Invalid value, please check your configuration")
         }
     }
 
@@ -63,7 +62,7 @@ fn read_file(path_to_file: &str) -> String {
 }
 
 
-fn main() -> std::io::Result<()> {
+fn main() -> io::Result<()> {
     let args = VersifyArgs::parse();
     let path = args.path;
     let domains = args.domain;
@@ -74,7 +73,7 @@ fn main() -> std::io::Result<()> {
 
     if domain_list.len() != version_list.len() {
         return Err(io::Error::new(
-            io::ErrorKind::Other,
+            io::ErrorKind::InvalidInput,
             "Domain_list and version_list have different sizes. \
             Make sure to enter the same number of domains and versions",
         ));
