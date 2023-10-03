@@ -12,9 +12,7 @@ use args::VersifyArgs;
 use crate::mappings::App;
 
 fn replace_version(file: &String, map: HashMap<&str, &str>) -> io::Result<()> {
-    fs::create_dir_all("output")?;
-    let output_file_path = "output/packages.txt";
-    let mut modified_file = String::new();
+    let mut modified_contents = file.clone();
 
     for (key, value) in &map {
         let binding = Regex::new(&key).unwrap();
@@ -22,29 +20,18 @@ fn replace_version(file: &String, map: HashMap<&str, &str>) -> io::Result<()> {
 
         match app.parse::<App>() {
             Ok(x) => {
-                for line in file.lines() {
-                    let domain_space = mappings::inspect_app(x);
-                    let mut modified_line = line.to_string();
+                let domain_space = mappings::inspect_app(x);
 
-                    let binding_args = Regex::new(r":(main/latest|\d+(\.\d+){0,3})");
-
-                    if domain_space.contains(&line) {
-                        if binding_args.expect("REASON").is_match(&modified_line) {
-                            modified_line = modified_line.replace(":main/latest", &format!(":{:}", &value));
-                        }
-                    }
-
-                    if line != modified_file {
-                        modified_file.push_str(&modified_line);
-                        modified_file.push('\n');
-                    }
+                for line in &domain_space {
+                    modified_contents = modified_contents.replace(line, &line.replace(":main/latest", &format!(":{:}", value)));
                 }
             }
             Err(_) => println!("Invalid value, please check your configuration")
         }
     }
-
-    fs::write(output_file_path, &modified_file).expect("Unable to write to output file");
+    fs::create_dir_all("output")?;
+    let output_file_path = "output/packages.txt";
+    fs::write(output_file_path, &modified_contents).expect("Unable to write to output file");
 
     Ok(())
 }
