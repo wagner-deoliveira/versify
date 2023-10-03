@@ -7,6 +7,8 @@ pub enum App {
     SPR,
     SSIV,
     SCE,
+    Integromics,
+    Image,
 }
 
 impl FromStr for App {
@@ -19,12 +21,14 @@ impl FromStr for App {
             "SPR" => Ok(App::SPR),
             "SSIV" => Ok(App::SSIV),
             "SCE" => Ok(App::SCE),
+            "Integromics" => Ok(App::Integromics),
+            "Image" => Ok(App::Image),
             _ => Err(())
         }
     }
 }
 
-pub(crate) fn inspect_app(app: App) -> Vec<&'static str> {
+pub fn inspect_app(app: App) -> Vec<&'static str> {
     match app {
         App::SDK => {
             vec![
@@ -38,7 +42,7 @@ pub(crate) fn inspect_app(app: App) -> Vec<&'static str> {
         App::SSC => {
             vec![
                 "PerkinElmer Signals Analytics Common:main/latest",
-                "PerkinElmer Signals Analytics Apps for Screening:main/latest"
+                "PerkinElmer Signals Analytics Apps for Screening:main/latest",
             ]
         }
         App::SPR => {
@@ -61,7 +65,7 @@ pub(crate) fn inspect_app(app: App) -> Vec<&'static str> {
                 "PerkinElmer SPR Steady State Analysis App:main/latest",
                 "PerkinElmer SPR Zeroing App:main/latest",
                 "Signals SPR Zeroing App:main/latest",
-                "PerkinElmer SPR Data Import SDK App:main/latest"
+                "PerkinElmer SPR Data Import SDK App:main/latest",
             ]
         }
         App::SSIV => {
@@ -76,11 +80,25 @@ pub(crate) fn inspect_app(app: App) -> Vec<&'static str> {
                 "PerkinElmer.Signals.InVivo.PKParameters:main/latest",
                 "PerkinElmer.Signals.InVivo.SequenceFileGenerator:main/latest",
                 "PerkinElmer.Signals.InVivo.SequenceOfEvents:main/latest",
-                "PerkinElmer.Signals.InVivo.StudyDesigner:main/latest"
+                "PerkinElmer.Signals.InVivo.StudyDesigner:main/latest",
             ]
         }
         App::SCE => {
             vec!["PerkinElmer Calculation Explorer:main/latest"]
+        }
+        App::Integromics => {
+            vec![
+                "Integromics.Hcs.Help:main/latest",
+                "Integromics.Hcs.Python:main/latest",
+                "Integromics.Hcs.Web:main/latest",
+                "Integromics.Hcs:main/latest",
+            ]
+        }
+        App::Image => {
+            vec![
+                "Image Import:main/latest",
+                "Image Discovery:main/latest",
+            ]
         }
     }
 }
