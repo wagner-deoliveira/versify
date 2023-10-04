@@ -37,4 +37,5 @@ The modified packages.txt file will be added to a folder named "output" inside y
 
 ## TODO:
 - Create a new branch and a pull request using GitHub API
-- Add option to select a desired output directory
+- Integration with Jenkins
+- <del>Add option to select a desired output directory</del>
