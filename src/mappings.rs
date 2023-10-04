@@ -2,13 +2,16 @@ use std::str::FromStr;
 
 #[derive(Clone, Copy)]
 pub enum App {
-    SDK,
+    SATK,
+    Mashup,
     SSC,
-    SPR,
     SSIV,
     SCE,
-    Integromics,
-    Image,
+    HCS,
+    ImageImport,
+    ImageDiscovery,
+    SciStream,
+    Metastore,
 }
 
 impl FromStr for App {
@@ -16,13 +19,16 @@ impl FromStr for App {
 
     fn from_str(app: &str) -> Result<Self, Self::Err> {
         match app {
-            "SDK" => Ok(App::SDK),
+            "SATK" => Ok(App::SATK),
+            "Mashup" => Ok(App::Mashup),
             "SSC" => Ok(App::SSC),
-            "SPR" => Ok(App::SPR),
             "SSIV" => Ok(App::SSIV),
             "SCE" => Ok(App::SCE),
-            "Integromics" => Ok(App::Integromics),
-            "Image" => Ok(App::Image),
+            "HCS" => Ok(App::HCS),
+            "ImageImport" => Ok(App::ImageImport),
+            "ImageDiscovery" => Ok(App::ImageDiscovery),
+            "SciStream" => Ok(App::SciStream),
+            "Metastore" => Ok(App::Metastore),
             _ => Err(())
         }
     }
@@ -30,75 +36,80 @@ impl FromStr for App {
 
 pub fn inspect_app(app: App) -> Vec<&'static str> {
     match app {
-        App::SDK => {
+        App::SATK => {
             vec![
-                "PerkinElmer Signals Analytics Apps:main/latest",
-                "PerkinElmer Signals Groups:main/latest",
-                "PerkinElmer Signals Platform Cobranding:main/latest",
-                "Signals SaaS:main/latest",
-                "Signals.Spotfire.Mashups.Tool:main/latest",
+                "PerkinElmer Signals Analytics Apps",
+                "PerkinElmer Signals Groups",
+                "PerkinElmer Signals Platform Cobranding",
+                "Signals SaaS",
             ]
         }
         App::SSC => {
             vec![
-                "PerkinElmer Signals Analytics Common:main/latest",
-                "PerkinElmer Signals Analytics Apps for Screening:main/latest",
-            ]
-        }
-        App::SPR => {
-            vec![
-                "PerkinElmer SPR Alignment App:main/latest",
-                "PerkinElmer SPR Blank Substraction App:main/latest",
-                "PerkinElmer SPR Common:main/latest",
-                "PerkinElmer SPR Cropping App:main/latest",
-                "PerkinElmer SPR Data Readers:main/latest",
-                "PerkinElmer SPR Export Report App:main/latest",
-                "PerkinElmer SPR Hit Selection App:main/latest",
-                "PerkinElmer SPR Reference App:main/latest",
-                "PerkinElmer SPR RAC App:main/latest",
-                "PerkinElmer SPR Relative Potency App:main/latest",
-                "PerkinElmer SPR Single Cycle Kinetics App:main/latest",
-                "PerkinElmer SPR MultiCycle Kinetic Analysis App:main/latest",
-                "PerkinElmer SPR ReportPoints App:main/latest",
-                "PerkinElmer SPR Solvent Correction App:main/latest",
-                "PerkinElmer SPR TraceDrawer Export App:main/latest",
-                "PerkinElmer SPR Steady State Analysis App:main/latest",
-                "PerkinElmer SPR Zeroing App:main/latest",
-                "Signals SPR Zeroing App:main/latest",
-                "PerkinElmer SPR Data Import SDK App:main/latest",
+                "PerkinElmer Signals Analytics Common",
+                "PerkinElmer Signals Analytics Apps for Screening",
+                "PerkinElmer SPR Alignment App",
+                "PerkinElmer SPR Blank Substraction App",
+                "PerkinElmer SPR Common",
+                "PerkinElmer SPR Cropping App",
+                "PerkinElmer SPR Data Readers",
+                "PerkinElmer SPR Export Report App",
+                "PerkinElmer SPR Hit Selection App",
+                "PerkinElmer SPR Reference App",
+                "PerkinElmer SPR RAC App",
+                "PerkinElmer SPR Relative Potency App",
+                "PerkinElmer SPR Single Cycle Kinetics App",
+                "PerkinElmer SPR MultiCycle Kinetic Analysis App",
+                "PerkinElmer SPR ReportPoints App",
+                "PerkinElmer SPR Solvent Correction App",
+                "PerkinElmer SPR TraceDrawer Export App",
+                "PerkinElmer SPR Steady State Analysis App",
+                "PerkinElmer SPR Zeroing App",
+                "Signals SPR Zeroing App",
+                "PerkinElmer SPR Data Import SDK App",
+                "PerkinElmer Signals VitroVivo Product",
             ]
         }
         App::SSIV => {
             vec![
-                "PerkinElmer.Signals.InVivo.BaselineCapture:main/latest",
-                "PerkinElmer.Signals.InVivo.BusinessRules:main/latest",
-                "PerkinElmer.Signals.InVivo.Common:main/latest",
-                "PerkinElmer.Signals.InVivo.DataModelDesigner:main/latest",
-                "PerkinElmer.Signals.InVivo.DosePreparation:main/latest",
-                "PerkinElmer.Signals.InVivo.DoseVerification:main/latest",
-                "PerkinElmer.Signals.InVivo.MassSpec:main/latest",
-                "PerkinElmer.Signals.InVivo.PKParameters:main/latest",
-                "PerkinElmer.Signals.InVivo.SequenceFileGenerator:main/latest",
-                "PerkinElmer.Signals.InVivo.SequenceOfEvents:main/latest",
-                "PerkinElmer.Signals.InVivo.StudyDesigner:main/latest",
+                "PerkinElmer.Signals.InVivo.BaselineCapture",
+                "PerkinElmer.Signals.InVivo.BusinessRules",
+                "PerkinElmer.Signals.InVivo.Common",
+                "PerkinElmer.Signals.InVivo.DataModelDesigner",
+                "PerkinElmer.Signals.InVivo.DosePreparation",
+                "PerkinElmer.Signals.InVivo.DoseVerification",
+                "PerkinElmer.Signals.InVivo.MassSpec",
+                "PerkinElmer.Signals.InVivo.PKParameters",
+                "PerkinElmer.Signals.InVivo.SequenceFileGenerator",
+                "PerkinElmer.Signals.InVivo.SequenceOfEvents",
+                "PerkinElmer.Signals.InVivo.StudyDesigner",
             ]
         }
         App::SCE => {
-            vec!["PerkinElmer Calculation Explorer:main/latest"]
+            vec!["PerkinElmer Calculation Explorer"]
         }
-        App::Integromics => {
+        App::HCS => {
             vec![
-                "Integromics.Hcs.Help:main/latest",
-                "Integromics.Hcs.Python:main/latest",
-                "Integromics.Hcs.Web:main/latest",
-                "Integromics.Hcs:main/latest",
+                "Integromics.Hcs.Help",
+                "Integromics.Hcs.Python",
+                "Integromics.Hcs.Web",
+                "Integromics.Hcs",
             ]
         }
-        App::Image => {
-            vec![
-                "Image Import:main/latest",
-                "Image Discovery:main/latest",
-            ]
+        App::ImageImport => {
+            vec!["Image Import"]
+        }
+        App::ImageDiscovery => {
+            vec!["Image Discovery"]
+        }
+        App::SciStream => {
+            vec!["SciStream Automation"]
+        }
+        App::Metastore => {
+            vec!["PerkinElmer.Signals.Analytics.Utils.Metastore"]
+        }
+        App::Mashup => {
+            vec!["Signals.Spotfire.Mashups.Tool"]
         }
     }
 }
