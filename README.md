@@ -1,4 +1,4 @@
-# Versify - A simple CLI tool for managing the versions made wiht Rust 
+# Versify - A simple CLI tool for managing versions  
 
 ## Usage
 <i>Help</i>
