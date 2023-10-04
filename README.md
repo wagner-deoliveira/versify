@@ -22,6 +22,10 @@ versify --help
 ````
 You can use to change on or several versions for different apps (comma separated).   
 The number of versions <strong>MUST</strong> match the number of domains to be changed, otherwise an error will be thrown.
+<br>
+<strong>NOTE:</strong>
+<br>
+The modified packages.txt file will be added to a folder named "output" inside your current working directory.  
 
 <i>Options</i>
 - -p, --path <PATH>: Path to the file directory
@@ -32,3 +36,4 @@ The number of versions <strong>MUST</strong> match the number of domains to be c
 
 ## TODO:
 - Create a new branch and a pull request using GitHub API
+- Add option to select a desired output directory
