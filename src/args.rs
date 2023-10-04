@@ -19,6 +19,8 @@ pub struct VersifyArgs{
 
 }
 
+//TODO: Add support to choose the output directory and subcommand to create a pull request using GitHub API
+
 #[derive(Debug, Subcommand)]
 pub enum ActionType {
     /// Create a new pull request
