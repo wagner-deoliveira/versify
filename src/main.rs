@@ -16,6 +16,12 @@ fn main() -> Result<(), Error> {
     let path = args.path;
     let domains = args.domain;
     let versions = args.build_number;
+    let mut output_path= "output";
+
+    if let Some(output) = args.output.as_deref() {
+        output_path = output;
+    }
+
 
     let domain_list: Vec<&str> = domains.split(",").collect();
     let version_list: Vec<&str> = versions.split(",").collect();
@@ -31,5 +37,5 @@ fn main() -> Result<(), Error> {
     let version_mapping: HashMap<&str, &str> = domain_list.clone().into_iter().zip(version_list.clone().into_iter()).collect();
 
     let file = read_file(&*path);
-    replace_version(&file, version_mapping)
+    replace_version(&file, version_mapping, output_path)
 }

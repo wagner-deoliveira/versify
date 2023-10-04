@@ -14,8 +14,8 @@ pub struct VersifyArgs{
     #[arg(short, long)]
     pub build_number: String,
     // Choose the output directory. By default it'll create a new directory called "output" in the current working directory
-    // #[arg(short, long)]
-    // output: String
+    #[arg(short, long, value_name = "OUTPUT_PATH")]
+    pub output: Option<String>
 
 }
 

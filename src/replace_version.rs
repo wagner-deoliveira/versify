@@ -5,7 +5,7 @@ use regex::Regex;
 use crate::mappings;
 use crate::mappings::App;
 
-pub fn replace_version(file: &String, map: HashMap<&str, &str>) -> Result<(), Error> {
+pub fn replace_version(file: &String, map: HashMap<&str, &str>, output_path: &str) -> Result<(), Error> {
     let mut modified_contents = file.clone();
 
     for (key, value) in &map {
@@ -29,8 +29,8 @@ pub fn replace_version(file: &String, map: HashMap<&str, &str>) -> Result<(), Er
             Err(_) => println!("Invalid value, please check your configuration")
         }
     }
-    fs::create_dir_all("output")?;
-    let output_file_path = "output/packages.txt";
+    fs::create_dir_all(output_path)?;
+    let output_file_path = &format!("{}/packages.txt", output_path);
     fs::write(output_file_path, &modified_contents).expect("Unable to write to output file");
 
     Ok(())
