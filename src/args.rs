@@ -13,7 +13,7 @@ pub struct VersifyArgs{
     /// The build number of the apps, e.g. 4.0.8.10268
     #[arg(short, long)]
     pub build_number: String,
-    // Choose the output directory. By default it'll create a new directory called "output" in the current working directory
+    /// Choose the output directory. By default, it'll create a new directory called "output" in the current working directory
     #[arg(short, long, value_name = "OUTPUT_PATH")]
     pub output: Option<String>
 

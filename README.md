@@ -27,10 +27,11 @@ The number of versions <strong>MUST</strong> match the number of domains to be c
 <br>
 The modified packages.txt file will be added to a folder named "output" inside your current working directory.  
 
-<i>Options</i>e
+<i>Options</i>
 - -p, --path <PATH>: Path to the file directory
 - -d, --domain <DOMAIN>: The name of the domain you want to modify. This is a list of valid domains: SATK, Mashup, SSC, SSIV, SCE, HCS, ImageImport, ImageDiscovery, SciStream, Metastore
 - -b, --build-number <BUILD_NUMBER>: The build number of the apps, e.g. 4.0.8.10268
+- -o, --output <OUTPUT_PATH> Choose the output directory. By default, it'll create a new directory called "output" in the current working directory
 -  -h, --help: Print help
 -  -V, --version: Print version
 
