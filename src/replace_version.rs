@@ -1,38 +1,50 @@
 use std::collections::HashMap;
 use std::fs;
-use std::io::Error;
+use std::error::Error;
 use regex::Regex;
 use crate::mappings;
 use crate::mappings::App;
 
-pub fn replace_version(file: &String, map: HashMap<&str, &str>, output_path: &str) -> Result<(), Error> {
-    let mut modified_contents = file.clone();
+pub fn replace_version(file: &str, map: HashMap<&str, &str>, output_path: &str) -> Result<(), Box<dyn Error>> {
+    let input_contents = file;
 
-    for (key, value) in &map {
-        let binding = Regex::new(&key).unwrap();
-        let app = binding.as_str();
+    let replace_fn = |line: &str| {
+        let mut modified_line = String::from(line);
 
-        match app.parse::<App>() {
-            Ok(x) => {
-                let domain_space = mappings::inspect_app(x);
-                let mut found_string;
+        for (key, value) in &map {
+            let binding = Regex::new(key).unwrap();
+            let app = binding.as_str();
 
-                for line in &domain_space {
-                    for mod_line in modified_contents.clone().lines() {
-                        if mod_line.starts_with(line) {
-                            found_string = mod_line;
-                            let replacement: Vec<&str> =  found_string.split(":").collect();
-                            modified_contents = modified_contents.replace(found_string, &format!("{}:{:}", replacement[0], value));
+            match app.parse::<App>() {
+                Ok(app) => {
+                    let domain_space = mappings::inspect_app(&app);
+
+                    for domain in &domain_space {
+                        if modified_line.starts_with(domain) {
+                            let parts: Vec<&str> = modified_line.split(":").collect();
+                            modified_line = format!("{}:{}", parts[0], value);
+                            break;
                         }
                     }
                 }
+                Err(_) => println!("Invalid value, please check your configuration"),
             }
-            Err(_) => println!("Invalid value, please check your configuration")
         }
-    }
+
+        modified_line
+    };
+
+    let modified_contents: String = input_contents
+        .lines()
+        .map(replace_fn)
+        .collect::<Vec<String>>()
+        .join("\n");
+
     fs::create_dir_all(output_path)?;
-    let output_file_path = &format!("{}/packages.txt", output_path);
-    fs::write(output_file_path, &modified_contents).expect("Unable to write to output file");
+
+    let output_file_path = format!("{}/packages.txt", output_path);
+    fs::write(&output_file_path, &modified_contents)?;
 
     Ok(())
 }
+

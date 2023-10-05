@@ -34,7 +34,7 @@ impl FromStr for App {
     }
 }
 
-pub fn inspect_app(app: App) -> Vec<&'static str> {
+pub fn inspect_app(app: &App) -> Vec<&'static str> {
     match app {
         App::SATK => {
             vec![
