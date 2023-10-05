@@ -21,7 +21,8 @@ pub fn replace_version(file: &String, map: HashMap<&str, &str>, output_path: &st
                     for mod_line in modified_contents.clone().lines() {
                         if mod_line.starts_with(line) {
                             found_string = mod_line;
-                            modified_contents = modified_contents.replace(found_string, &format!("{}:{:}", &line, value));
+                            let replacement: Vec<&str> =  found_string.split(":").collect();
+                            modified_contents = modified_contents.replace(found_string, &format!("{}:{:}", replacement[0], value));
                         }
                     }
                 }
