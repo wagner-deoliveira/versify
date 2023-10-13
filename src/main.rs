@@ -5,10 +5,11 @@ mod replace_version;
 
 use std::collections::HashMap;
 use std::error::Error;
-use clap::Parser;
+use clap::{Command, Parser};
 use args::VersifyArgs;
 use read_file::read_file;
 use replace_version::replace_version;
+use crate::args::{EntityType, GitHubActions};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args = VersifyArgs::parse();
@@ -21,6 +22,19 @@ fn main() -> Result<(), Box<dyn Error>> {
         output_path = output;
     }
 
+    // if let Some(create_pr) = args.github_actions.as_deref() {
+    //     println!("The text {create_pr}");
+    // }
+
+   // You can check for the existence of subcommands, and if found use their
+    // matches just as you would the top level cmd
+    // match EntityType {
+    //     Some(EntityType::Create(_) ) => {
+    //         println!("Printing testing lists...");
+    //     }
+    //     None => {}
+    //     _ => {}
+    // }
 
     let domain_list: Vec<&str> = domains.split(",").collect();
     let version_list: Vec<&str> = versions.split(",").collect();
