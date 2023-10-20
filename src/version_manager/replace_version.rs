@@ -2,8 +2,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::error::Error;
 use regex::Regex;
-use crate::mappings;
-use crate::mappings::App;
+use crate::version_manager::mappings;
 
 pub fn replace_version(file: &str, map: HashMap<&str, &str>, output_path: &str) -> Result<(), Box<dyn Error>> {
     let input_contents = file;
@@ -15,7 +14,7 @@ pub fn replace_version(file: &str, map: HashMap<&str, &str>, output_path: &str) 
             let binding = Regex::new(key).unwrap();
             let app = binding.as_str();
 
-            match app.parse::<App>() {
+            match app.parse::<mappings::App>() {
                 Ok(app) => {
                     let domain_space = mappings::inspect_app(&app);
 

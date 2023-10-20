@@ -1,4 +1,4 @@
-use reqwest::{Client, header};
+use reqwest::header;
 use dotenv::dotenv;
 use std::env;
 pub async fn get_packages(branch: &str) -> reqwest::Result<String> {

@@ -1,17 +1,15 @@
 mod args;
-mod mappings;
-mod read_file;
-mod replace_version;
-mod get_packages_from_github;
+mod reader;
+mod github;
+mod version_manager;
 
 use std::collections::HashMap;
 use std::error::Error;
 use clap::Parser;
 use args::VersifyArgs;
-use read_file::read_file;
-use replace_version::replace_version;
-use get_packages_from_github::get_packages;
-use crate::args::EntityType;
+use args::EntityType;
+use reader::read_file::read_file;
+use version_manager::replace_version::replace_version;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -36,7 +34,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         }
         Some(EntityType::Download(name)) => {
-            todo!("To be implemented")
+            match name.string {
+                Some(ref _name) => {
+                    println!("{:?}", _name);
+                    Ok(())
+                }
+                None => {
+                    println!("Provide a valid option to create a new domain");
+                    panic!("To be implemented")
+                }
+            }
         }
         Some(EntityType::Update(name)) => {
             let domains = &name.domain;
@@ -47,7 +54,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(branch_name) = &name.branch.as_deref() {
                 branch = branch_name
             }
-            let mut packages = get_packages(branch).await.expect("Something went wrong");
+            let mut packages = github::get_packages_from_github::get_packages(branch).await.expect("Something went wrong");
 
             if let Some(path) = &name.path.as_deref() {
                 packages = read_file(&*path);
