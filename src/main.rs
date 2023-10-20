@@ -2,6 +2,7 @@ mod args;
 mod mappings;
 mod read_file;
 mod replace_version;
+mod get_packages_from_github;
 
 use std::collections::HashMap;
 use std::error::Error;
@@ -9,9 +10,11 @@ use clap::Parser;
 use args::VersifyArgs;
 use read_file::read_file;
 use replace_version::replace_version;
+use get_packages_from_github::get_packages;
 use crate::args::EntityType;
 
-fn main() -> Result<(), Box<dyn Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     let args = VersifyArgs::parse();
 
     match &args.command {
@@ -21,20 +24,39 @@ fn main() -> Result<(), Box<dyn Error>> {
             )
         }
         Some(EntityType::Create(name)) => {
-            todo!("To be implemented")
+            match name.string {
+                Some(ref _name) => {
+                    println!("{:?}", _name);
+                    Ok(())
+                }
+                None => {
+                    println!("Provide a valid option to create a new domain");
+                    panic!("To be implemented")
+                }
+            }
         }
         Some(EntityType::Download(name)) => {
             todo!("To be implemented")
         }
         Some(EntityType::Update(name)) => {
-            let path = &name.path;
             let domains = &name.domain;
-            let versions = &name.build_number;
+            let versions = &name.version;
             let mut output_path = "output";
+            let mut branch = "main";
+
+            if let Some(branch_name) = &name.branch.as_deref() {
+                branch = branch_name
+            }
+            let mut packages = get_packages(branch).await.expect("Something went wrong");
+
+            if let Some(path) = &name.path.as_deref() {
+                packages = read_file(&*path);
+            }
 
             if let Some(output) = &name.output.as_deref() {
                 output_path = output;
             }
+
             let domain_list: Vec<&str> = domains.split(",").collect();
             let version_list: Vec<&str> = versions.split(",").collect();
 
@@ -45,9 +67,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             };
 
             let version_mapping: HashMap<&str, &str> = domain_list.clone().into_iter().zip(version_list.clone().into_iter()).collect();
-
-            let file = read_file(&*path);
-            replace_version(&file, version_mapping, output_path)
+            replace_version(&packages, version_mapping, output_path)
         }
     }
 }

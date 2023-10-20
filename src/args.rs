@@ -35,15 +35,18 @@ pub struct DownloadCommand {
 pub struct UpdateCommand {
     /// Path to the file directory
     #[arg(short, long)]
-    pub path: String,
+    pub path: Option<String>,
     /// The name of the domain you want to modify. This is a list of valid domains:
     /// SATK, Mashup, SSC, SSIV, SCE, HCS, ImageImport, ImageDiscovery, SciStream, Metastore.
     #[arg(short, long)]
     pub domain: String,
     /// The build number of the apps, e.g. 3.0.8.10268
     #[arg(short, long)]
-    pub build_number: String,
+    pub version: String,
     /// Choose the output directory. By default, it'll create a new directory called "output" in the current working directory
     #[arg(short, long, value_name = "OUTPUT_PATH")]
     pub output: Option<String>,
+    /// Choose the branch in the repository. By default, it'll pull the packages.txt from main
+    #[arg(short, long)]
+    pub branch: Option<String>
 }

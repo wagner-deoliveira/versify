@@ -1,6 +1,6 @@
 [package]
 name = "versify"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["Wagner de Oliveira da Rosa"]
 description = "A simple CLI tool for managing the versions in packages.txt"
@@ -15,4 +15,7 @@ clap = { version = "4.4.4" , features = ["derive"]}
 regex = "1.9.5"
 log = "0.4.20"
 lazy_static = "1.4.0"
-
+serde_json = "1.0"
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros"] }
+dotenv = "0.15.0"
