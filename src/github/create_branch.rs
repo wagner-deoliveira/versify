@@ -1,6 +1,7 @@
 use reqwest::header;
 use dotenv::dotenv;
 use std::env;
+use std::ops::Deref;
 use serde::de::Error;
 use serde::Deserialize;
 
@@ -11,7 +12,7 @@ struct Object {
     sha: String,
     #[serde(rename = "type")]
     _type: String,
-    url: String
+    url: String,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Deserialize)]
@@ -20,10 +21,20 @@ struct Branch {
     ref_name: String,
     node_id: String,
     url: String,
-    object: Object
+    object: Object,
 }
 
-pub fn create_new_branch(branch_source: &str,branch_name: &str) {
+trait Contains {
+    fn contains(&self, param: &str) -> String;
+}
+
+impl Contains for Branch {
+    fn contains(&self, param: &str) -> String {
+        return self.ref_name.contains(&param).to_string();
+    }
+}
+
+pub fn create_new_branch(branch_source: &str, branch_name: &str) {
     dotenv().ok();
     let github_token = env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN must be set.");
     let token = format!("Bearer {}", github_token);
@@ -42,7 +53,9 @@ pub fn create_new_branch(branch_source: &str,branch_name: &str) {
         .expect("Something went wrong");
 
     let refs_heads = res.json::<Response>().unwrap();
-    for ref_name in refs_heads {
-        println!("{}", ref_name.ref_name);
-    }
+    let test_field: Vec<String> = refs_heads.iter()
+        .filter_map(|head| Some(head.contains("refs/heads/23-9-x").parse().unwrap()))
+        .collect();
+
+    println!("{:?}", test_field);
 }
