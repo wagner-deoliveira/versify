@@ -12,7 +12,7 @@ pub struct VersifyArgs {
 #[derive(Debug, Subcommand)]
 pub enum EntityType {
     /// Create a pull request
-    Create(PrCommand),
+    CreatePR(PrCommand),
     /// Download the packages.txt file from the repository
     Download(DownloadCommand),
     /// Update the packages.txt file from the repository

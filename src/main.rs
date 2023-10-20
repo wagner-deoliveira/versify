@@ -10,6 +10,7 @@ use args::VersifyArgs;
 use args::EntityType;
 use reader::read_file::read_file;
 use version_manager::replace_version::replace_version;
+use github::create_branch::create_new_branch;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -21,10 +22,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         Make sure to enter the same number of domains and versions").unwrap(),
             )
         }
-        Some(EntityType::Create(name)) => {
+        Some(EntityType::CreatePR(name)) => {
             match name.string {
                 Some(ref _name) => {
-                    println!("{:?}", _name);
+                    create_new_branch(_name, "test");
                     Ok(())
                 }
                 None => {
