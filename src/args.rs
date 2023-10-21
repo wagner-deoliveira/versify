@@ -22,7 +22,8 @@ pub enum EntityType {
 
 #[derive(Debug, Args)]
 pub struct PrCommand {
-    pub string: Option<String>,
+    pub source: String,
+    pub new_branch: String,
 }
 
 #[derive(Debug, Args)]
@@ -48,5 +49,5 @@ pub struct UpdateCommand {
     pub output: Option<String>,
     /// Choose the branch in the repository. By default, it'll pull the packages.txt from main
     #[arg(short, long)]
-    pub branch: Option<String>
+    pub branch: Option<String>,
 }

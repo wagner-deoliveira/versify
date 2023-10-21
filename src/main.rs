@@ -23,16 +23,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             )
         }
         Some(EntityType::CreatePR(name)) => {
-            match name.string {
-                Some(ref _name) => {
-                    create_new_branch(_name, "test");
-                    Ok(())
-                }
-                None => {
-                    println!("Provide a valid option to create a new domain");
-                    panic!("To be implemented")
-                }
-            }
+            create_new_branch(&name.source, &name.new_branch).expect("Something went wrong");
+            Ok(())
         }
         Some(EntityType::Download(name)) => {
             match name.string {

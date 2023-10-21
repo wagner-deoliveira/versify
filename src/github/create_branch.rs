@@ -1,11 +1,10 @@
 use reqwest::header;
 use dotenv::dotenv;
 use std::env;
-use std::ops::Deref;
-use serde::de::Error;
+use std::error::Error;
 use serde::Deserialize;
 
-pub type Response = Vec<Branch>;
+type Response = Vec<Branch>;
 
 #[derive(Default, Debug, Clone, PartialEq, Deserialize)]
 struct Object {
@@ -34,7 +33,7 @@ impl Contains for Branch {
     }
 }
 
-pub fn create_new_branch(branch_source: &str, branch_name: &str) {
+pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), Box<dyn Error>> {
     dotenv().ok();
     let github_token = env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN must be set.");
     let token = format!("Bearer {}", github_token);
@@ -53,9 +52,32 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) {
         .expect("Something went wrong");
 
     let refs_heads = res.json::<Response>().unwrap();
-    let test_field: Vec<String> = refs_heads.iter()
-        .filter_map(|head| Some(head.contains("refs/heads/23-9-x").parse().unwrap()))
-        .collect();
 
-    println!("{:?}", test_field);
+    let target_value = format!("refs/heads/{}", branch_source);
+    let mut get_branch = Branch::default();
+    for heads in &refs_heads {
+        if heads.ref_name.eq(&target_value) {
+            get_branch = heads.to_owned();
+        }
+    }
+
+    headers = header::HeaderMap::new();
+    headers.insert("Accept", "application/vnd.github+json".parse().unwrap());
+    headers.insert("Authorization", token.parse().unwrap());
+    headers.insert("X-GitHub-Api-Version", "2022-11-28".parse().unwrap());
+    headers.insert("Content-Type", "application/x-www-form-urlencoded".parse().unwrap());
+    headers.insert("User-Agent", "reqwst".parse().unwrap());
+
+    if get_branch.object.sha.is_empty() {
+        return Err::<Result<(), Box<(dyn Error + 'static)>>, Box<dyn Error>>(Box::try_from("No branch has been found with this conditions").unwrap()).unwrap();
+    }
+
+    let body_post = format!("{{\"ref\": \"refs/heads/{}\", \"sha\": \"{}\"}}", branch_name, get_branch.object.sha);
+    client.post("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs")
+        .headers(headers)
+        .body(body_post)
+        .send()?
+        .text()?;
+
+    Ok(())
 }
