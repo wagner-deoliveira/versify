@@ -81,3 +81,30 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
 
     Ok(())
 }
+
+pub fn list_all_branches() -> Result<(), Box<dyn Error>>{
+    dotenv().ok();
+    let github_token = env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN must be set.");
+    let token = format!("Bearer {}", github_token);
+    let repo_branch_list = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs/heads");
+
+    let mut headers = header::HeaderMap::new();
+    headers.insert("Accept", "application/vnd.github.raw".parse().unwrap());
+    headers.insert("Authorization", token.parse().unwrap());
+    headers.insert("X-GitHub-Api-Version", "2021-11-28".parse().unwrap());
+    headers.insert("User-Agent", "reqwst".parse().unwrap());
+
+    let client = reqwest::blocking::Client::new();
+    let res = client.get(repo_branch_list)
+        .headers(headers)
+        .send()
+        .expect("Something went wrong");
+
+    let refs_heads = res.json::<Response>().expect("Maybe something went wrong");
+
+    for heads in &refs_heads {
+        println!("{:?}", heads);
+    }
+
+    Ok(())
+}

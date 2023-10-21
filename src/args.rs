@@ -7,8 +7,6 @@ pub struct VersifyArgs {
     pub command: Option<EntityType>,
 }
 
-//TODO: Add support to choose the output directory and subcommand to create a pull request using GitHub API
-
 #[derive(Debug, Subcommand)]
 pub enum EntityType {
     /// Create a pull request
@@ -17,6 +15,8 @@ pub enum EntityType {
     Download(DownloadCommand),
     /// Update the packages.txt file from the repository
     Update(UpdateCommand),
+    /// List all branches of the repository
+    List(ListCommand),
 }
 
 
@@ -31,6 +31,8 @@ pub struct DownloadCommand {
     pub string: Option<String>,
 }
 
+#[derive(Debug, Args)]
+pub struct ListCommand {}
 
 #[derive(Debug, Args)]
 pub struct UpdateCommand {

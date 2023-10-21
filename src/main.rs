@@ -10,7 +10,7 @@ use args::VersifyArgs;
 use args::EntityType;
 use reader::read_file::read_file;
 use version_manager::replace_version::replace_version;
-use github::create_branch::create_new_branch;
+use github::create_branch::{create_new_branch, list_all_branches};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -68,6 +68,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
             let version_mapping: HashMap<&str, &str> = domain_list.clone().into_iter().zip(version_list.clone().into_iter()).collect();
             replace_version(&packages, version_mapping, output_path)
+        }
+        Some(EntityType::List(_)) => {
+            list_all_branches()
         }
     }
 }
