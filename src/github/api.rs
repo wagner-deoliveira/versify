@@ -140,7 +140,6 @@ pub fn create_pr(title: &str, body: &str, branch: &str, target_branch: &str) -> 
         .body(body)
         .send()?;
 
-
     Ok(println!("Status code: {:?}", res.status()))
 }
 
