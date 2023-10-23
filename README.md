@@ -88,8 +88,7 @@ versify -p C:\<PATH>\packages.txt -d SSC,SCE,SATK -b 4.0.8.333,1.6.4.5,5.3.33
 - -d, --domain <DOMAIN>: The name of the domain you want to modify. This is a list of valid domains: SATK, Mashup, SSC, SSIV, SCE, HCS, ImageImport, ImageDiscovery, SciStream, Metastore
 - -b, --build-number <BUILD_NUMBER>: The build number of the apps, e.g. 4.0.8.10268
 - -o, --output <OUTPUT_PATH>: Choose the output directory. By default, it'll create a new directory called "output" in the current working directory
--  -h, --help: Print help
--  -V, --version: Print version
+- -h, --help: Print help
 
 ## TODO:
 - <del>Create a new branch and a pull request using GitHub API
