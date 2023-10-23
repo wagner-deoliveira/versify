@@ -61,10 +61,10 @@ pub struct CreatePrCommand {
 
 #[derive(Debug, Args)]
 pub struct DownloadCommand {
-    /// Source branch (i.e. your current working branch)
+    /// Choose the branch in the repository. By default, it'll pull the packages.txt from main
     #[arg(short, long)]
     pub branch: String,
-    /// Choose the output directory. By default, it'll create a new directory called "output" in the current working directory
+    /// Choose the output directory. By default, it'll create a new directory called "tmp" in the current working directory
     #[arg(short, long, value_name = "OUTPUT_PATH")]
     pub output: Option<String>,
 }
