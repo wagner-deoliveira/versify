@@ -40,7 +40,15 @@ pub struct UpdateBranchCommand {
     pub target_branch: String,
     /// File path
     #[arg(short, long)]
-    pub path: String,
+    pub path: Option<String>,
+    /// The name of the domain you want to modify. This is a list of valid domains:
+    /// SATK, Mashup, SSC, SSIV, SCE, HCS, ImageImport, ImageDiscovery, SciStream, Metastore.
+    #[arg(short, long)]
+    pub domain: Option<String>,
+    /// The build number of the apps, e.g. 3.0.8.10268
+    #[arg(short, long)]
+    pub version: Option<String>,
+
 }
 
 #[derive(Debug, Args)]

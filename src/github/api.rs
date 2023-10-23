@@ -6,6 +6,7 @@ use crate::github::init_headers::{init, MediaType};
 use crate::reader::read_file::read_file;
 use base64::{engine::general_purpose, Engine};
 use crate::github::get_packages_from_github::get_packages;
+use crate::version_manager::replace_version::replace_version_in_repository;
 
 type References = Vec<RefHead>;
 type Branches = Vec<Branch>;
@@ -103,7 +104,7 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
         .send()?
         .text()?;
 
-    Ok(())
+    Ok(println!("Branch creaated: {}", &branch_name))
 }
 
 pub fn list_all_branches() -> Vec<String> {
@@ -127,7 +128,33 @@ pub fn list_all_branches() -> Vec<String> {
     return branch_names;
 }
 
-pub fn update_file_in_branch(message: &str, target_branch: &str, path_to_content: String) -> Result<(), Box<dyn Error>> {
+pub fn create_pr(title: &str, body: &str, branch: &str, target_branch: &str) -> Result<(), Box<dyn Error>> {
+    let headers = init(JSON);
+    let pull_url = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/pulls";
+
+    let body = format!("{{\"title\":\"{}\",\"body\":\"{}\",\"head\":\"{}\", \"base\": \"{}\"}}", title, body, branch, target_branch);
+
+    let client = reqwest::blocking::Client::new();
+    let res = client.post(pull_url)
+        .headers(headers)
+        .body(body)
+        .send()?;
+
+
+    Ok(println!("Status code: {:?}", res.status()))
+}
+
+pub async fn download_package(branch: &str, output_path: &str) -> Result<(), Box<dyn Error>> {
+    let file = get_packages(branch).await.expect("Failed to download package");
+    fs::create_dir_all(output_path)?;
+
+    let output_file_path = format!("{}/packages.txt", &output_path);
+    fs::write(output_file_path, file)?;
+
+    Ok(())
+}
+
+pub fn update_file(message: &str, target_branch: &str, path_to_content: String) -> Result<(), Box<dyn Error>> {
     let content_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/contents/packages.txt?ref={}", target_branch);
     let headers = init(JSON);
 
@@ -151,29 +178,29 @@ pub fn update_file_in_branch(message: &str, target_branch: &str, path_to_content
     Ok(println!("Status code: {}", res.status()))
 }
 
-pub fn create_pr(title: &str, body: &str, branch: &str, target_branch: &str) -> Result<(), Box<dyn Error>> {
+pub async fn update_file_in_branch(message: &str, target_branch: &str, map: HashMap<&str, &str>) -> Result<(), Box<dyn Error>> {
+    let content_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/contents/packages.txt?ref={}", target_branch);
     let headers = init(JSON);
-    let pull_url = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/pulls";
-
-    let body = format!("{{\"title\":\"{}\",\"body\":\"{}\",\"head\":\"{}\", \"base\": \"{}\"}}", title, body, branch, target_branch);
 
     let client = reqwest::blocking::Client::new();
-    let res = client.post(pull_url)
+    let res = client.get(&content_url)
+        .headers(headers.clone())
+        .send()
+        .expect("Something went wrong");
+
+    let content = res.json::<Content>().unwrap();
+
+    let file = get_packages(&target_branch).await.expect("Failed to download package");
+    let content_from_branch = replace_version_in_repository(file.as_str(), map);
+    let encoded_content = general_purpose::STANDARD.encode(content_from_branch);
+    let body = format!("{{\"message\":\"{}\",\"committer\":{{\"name\":\"Wagner Rosa\",\"email\":\"wagner.deoliveira@revvity.com\"}},\"content\":\"{}\",\"sha\": \"{}\",\"branch\":\"{}\" }}", message, encoded_content, content.sha, target_branch);
+
+    let client = reqwest::blocking::Client::new();
+    let res = client.put(content_url)
         .headers(headers)
         .body(body)
         .send()?;
 
-
-    Ok(println!("Status: {:?}", res.status()))
-}
-
-pub async fn download_package(branch: &str, output_path: &str) -> Result<(), Box<dyn Error>> {
-    let file = get_packages(branch).await.expect("Failed to download package");
-    fs::create_dir_all(output_path)?;
-
-    let output_file_path = format!("{}/packages.txt", &output_path);
-    fs::write(output_file_path, file)?;
-
-    Ok(())
+    Ok(println!("Status code: {}", res.status()))
 }
 

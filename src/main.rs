@@ -9,9 +9,9 @@ use clap::Parser;
 use args::VersifyArgs;
 use args::EntityType;
 use reader::read_file::read_file;
-use version_manager::replace_version::replace_version;
+use version_manager::replace_version::replace_version_to_file;
 use github::api::{create_new_branch, list_all_branches};
-use crate::github::api::{create_pr, download_package, update_file_in_branch};
+use crate::github::api::{create_pr, download_package, update_file, update_file_in_branch};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -27,7 +27,28 @@ async fn main() -> Result<(), Box<dyn Error>> {
             Ok(create_new_branch(&name.source, &name.new_branch).expect("Something went wrong"))
         }
         Some(EntityType::UpdateBranch(name)) => {
-            Ok(update_file_in_branch(&name.message, &name.target_branch, String::from(&name.path)).expect("Something went wrong"))
+            if let Some(path) = &name.path {
+                return Ok(update_file(&name.message, &name.target_branch, String::from(path)).expect("Something went wrong"));
+            }
+
+            let mut domain_list = vec![];
+            let mut version_list = vec![];
+            if let Some(domains) = &name.domain {
+                domain_list = domains.split(",").collect();
+            }
+
+            if let Some(versions) = &name.version {
+                version_list = versions.split(",").collect();
+            }
+
+            if domain_list.len() != version_list.len() {
+                Err::<EntityType, Box<dyn Error>>(Box::try_from("Domain_list and version_list have different sizes. \
+                        Make sure to enter the same number of domains and versions").unwrap(),
+                ).unwrap();
+            };
+
+            let version_mapping: HashMap<&str, &str> = domain_list.clone().into_iter().zip(version_list.clone().into_iter()).collect();
+            Ok(update_file_in_branch(&name.message, &name.target_branch, version_mapping).await.expect("Something went wrong"))
         }
         Some(EntityType::CreatePr(name)) => {
             Ok(create_pr(&name.title, &name.message, &name.branch, &name.target_branch).expect("Something went wrong"))
@@ -71,7 +92,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             };
 
             let version_mapping: HashMap<&str, &str> = domain_list.clone().into_iter().zip(version_list.clone().into_iter()).collect();
-            replace_version(&packages, version_mapping, output_path)
+            replace_version_to_file(&packages, version_mapping, output_path)
         }
         Some(EntityType::List(_)) => {
             let list_branches = list_all_branches();
