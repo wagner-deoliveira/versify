@@ -1,8 +1,7 @@
-use reqwest::header;
-use dotenv::dotenv;
-use std::env;
 use std::error::Error;
 use serde::Deserialize;
+use crate::github::init_headers::{init, MediaType};
+use base64::{Engine as _, engine::general_purpose};
 
 type References = Vec<RefHead>;
 type Branches = Vec<Branch>;
@@ -47,17 +46,12 @@ impl Contains for RefHead {
     }
 }
 
-pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), Box<dyn Error>> {
-    dotenv().ok();
-    let github_token = env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN must be set.");
-    let token = format!("Bearer {}", github_token);
-    let repo_branch_list = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs/heads");
+const RAW: MediaType = MediaType::RAW;
+const JSON: MediaType = MediaType::JSON;
 
-    let mut headers = header::HeaderMap::new();
-    headers.insert("Accept", "application/vnd.github.raw".parse().unwrap());
-    headers.insert("Authorization", token.parse().unwrap());
-    headers.insert("X-GitHub-Api-Version", "2022-11-28".parse().unwrap());
-    headers.insert("User-Agent", "reqwst".parse().unwrap());
+pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), Box<dyn Error>> {
+    let repo_branch_list = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs/heads");
+    let mut headers = init(RAW);
 
     let client = reqwest::blocking::Client::new();
     let res = client.get(repo_branch_list)
@@ -75,12 +69,7 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
         }
     }
 
-    headers = header::HeaderMap::new();
-    headers.insert("Accept", "application/vnd.github+json".parse().unwrap());
-    headers.insert("Authorization", token.parse().unwrap());
-    headers.insert("X-GitHub-Api-Version", "2022-11-28".parse().unwrap());
-    headers.insert("Content-Type", "application/x-www-form-urlencoded".parse().unwrap());
-    headers.insert("User-Agent", "reqwst".parse().unwrap());
+    headers = init(JSON);
 
     if get_branch.object.sha.is_empty() {
         return Err::<Result<(), Box<(dyn Error + 'static)>>, Box<dyn Error>>(Box::try_from("No branch has been found with this conditions").unwrap()).unwrap();
@@ -97,16 +86,9 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
 }
 
 pub fn list_all_branches() -> Result<(), Box<dyn Error>>{
-    dotenv().ok();
-    let github_token = env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN must be set.");
-    let token = format!("Bearer {}", github_token);
     let repo_branch_list = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/branches");
 
-    let mut headers = header::HeaderMap::new();
-    headers.insert("Accept", "application/vnd.github+json".parse().unwrap());
-    headers.insert("Authorization", token.parse().unwrap());
-    headers.insert("X-GitHub-Api-Version", "2022-11-28".parse().unwrap());
-    headers.insert("User-Agent", "reqwst".parse().unwrap());
+    let headers = init(JSON);
 
     let client = reqwest::blocking::Client::new();
     let res = client.get(repo_branch_list)
@@ -122,3 +104,18 @@ pub fn list_all_branches() -> Result<(), Box<dyn Error>>{
 
     Ok(())
 }
+fn update_file_in_branch(message: &str, target_branch: &str, content: String) -> Result<(), Box<dyn Error>> {
+    let headers = init(JSON);
+    let content_url = format!("https://api.github.com/repos/perkinelmer/srp-spotfire-addins/contents/packages.txt?ref={}", target_branch);
+
+    let client = reqwest::blocking::Client::new();
+    let res = client.put(content_url)
+        .headers(headers)
+        .body("{\"message\":\"my commit message\",\"committer\":{\"name\":\"Monalisa Octocat\",\"email\":\"octocat@github.com\"},\"content\":\"bXkgbmV3IGZpbGUgY29udGVudHM=\"}")
+        .send()?;
+
+    Ok(())
+}
+
+
+

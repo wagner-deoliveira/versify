@@ -1,6 +1,7 @@
 use reqwest::header;
 use dotenv::dotenv;
 use std::env;
+
 pub async fn get_packages(branch: &str) -> reqwest::Result<String> {
     dotenv().ok();
     let github_token = env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN must be set.");
@@ -19,7 +20,6 @@ pub async fn get_packages(branch: &str) -> reqwest::Result<String> {
         .send()
         .expect("Something went wrong")
         .text();
-
 
     return packages;
 }
