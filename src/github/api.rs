@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 use serde::Deserialize;
@@ -37,6 +38,23 @@ struct Branch {
     name: String,
     commit: Commit,
     protected: bool,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
+struct Content {
+    name: String,
+    path: String,
+    sha: String,
+    size: u16,
+    url: String,
+    html_url: String,
+    git_url: String,
+    download_url: String,
+    #[serde(rename = "type")]
+    _type: String,
+    content: String,
+    encoding: String,
+    _links: HashMap<String, String>,
 }
 
 trait Contains {
@@ -110,37 +128,19 @@ pub fn list_all_branches() -> Vec<String> {
 }
 
 pub fn update_file_in_branch(message: &str, target_branch: &str, path_to_content: String) -> Result<(), Box<dyn Error>> {
-    let repo_branch_list = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs/heads");
-    let mut headers = init(RAW);
+    let content_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/contents/packages.txt?ref={}", target_branch);
+    let headers = init(JSON);
 
     let client = reqwest::blocking::Client::new();
-    let res = client.get(repo_branch_list)
-        .headers(headers)
+    let res = client.get(&content_url)
+        .headers(headers.clone())
         .send()
         .expect("Something went wrong");
 
-    let refs_heads = res.json::<References>().unwrap();
-
-    let target_value = format!("refs/heads/{}", &target_branch);
-    let mut get_branch = RefHead::default();
-    for heads in &refs_heads {
-        if heads.ref_name.eq(&target_value) {
-            get_branch = heads.to_owned();
-        }
-    }
-
-    if get_branch.object.sha.is_empty() {
-        return Err::<Result<(), Box<(dyn Error + 'static)>>, Box<dyn Error>>(Box::try_from("No branch has been found with this conditions").unwrap()).unwrap();
-    }
-
-    let content = read_file(&path_to_content);
-    headers = init(JSON);
-    let content_url = "https://api.github.cm/repos/perkinelmer/srp-spotfire-addins/contents/packages.txt";
-
-    let encoded_content = general_purpose::STANDARD.encode(content);
-    let body = format!("{{\"message\":\"{}\",\"committer\":{{\"name\":\"Wagner Rosa\",\"email\":\"wagner.deoliveira@revvity.com\"}},\"content\":\"{}\",\"sha\": \"{}\",\"branch\":\"{}\" }}", message, encoded_content, get_branch.object.sha, target_branch);
-
-    println!("{:?}", &body);
+    let content = res.json::<Content>().unwrap();
+    let file = read_file(&path_to_content);
+    let encoded_content = general_purpose::STANDARD.encode(file);
+    let body = format!("{{\"message\":\"{}\",\"committer\":{{\"name\":\"Wagner Rosa\",\"email\":\"wagner.deoliveira@revvity.com\"}},\"content\":\"{}\",\"sha\": \"{}\",\"branch\":\"{}\" }}", message, encoded_content, content.sha, target_branch);
 
     let client = reqwest::blocking::Client::new();
     let res = client.put(content_url)
@@ -148,9 +148,7 @@ pub fn update_file_in_branch(message: &str, target_branch: &str, path_to_content
         .body(body)
         .send()?;
 
-    println!("{:?}", res);
-
-    Ok(())
+    Ok(println!("Status code: {}", res.status()))
 }
 
 pub fn create_pr(title: &str, body: &str, branch: &str, target_branch: &str) -> Result<(), Box<dyn Error>> {
@@ -165,9 +163,8 @@ pub fn create_pr(title: &str, body: &str, branch: &str, target_branch: &str) -> 
         .body(body)
         .send()?;
 
-    println!("Status: {:?}", res.status());
 
-    Ok(())
+    Ok(println!("Status: {:?}", res.status()))
 }
 
 pub async fn download_package(branch: &str, output_path: &str) -> Result<(), Box<dyn Error>> {
