@@ -1,5 +1,4 @@
 use std::env;
-use clap::builder::TypedValueParser;
 use dotenv::dotenv;
 use reqwest::header::HeaderMap;
 
@@ -14,7 +13,6 @@ fn get_media_type(media_type: MediaType) -> &'static str {
         MediaType::RAW => "application/vnd.github.raw",
         MediaType::HTML => "application/vnd.github.html",
         MediaType::JSON => "application/vnd.github+json",
-        _ => "unknown"
     }
 }
 
@@ -29,7 +27,7 @@ pub fn init(api_media: MediaType) -> HeaderMap {
     headers.insert("Accept", api_type.parse().unwrap());
     headers.insert("Authorization", token.parse().unwrap());
     headers.insert("X-GitHub-Api-Version", "2022-11-28".parse().unwrap());
-    headers.insert("User-Agent", "reqwst".parse().unwrap());
+    headers.insert("User-Agent", "versify".parse().unwrap());
 
     return headers;
 }

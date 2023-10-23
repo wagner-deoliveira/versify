@@ -9,8 +9,12 @@ pub struct VersifyArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum EntityType {
+    /// Create a new branch
+    CreateBranch(CreateBranchCommand),
     /// Create a pull request
-    CreatePR(PrCommand),
+    UpdateBranch(UpdateBranchCommand),
+    /// Create a pull request
+    CreatePr(CreatePrCommand),
     /// Download the packages.txt file from the repository
     Download(DownloadCommand),
     /// Update the packages.txt file from the repository
@@ -21,9 +25,38 @@ pub enum EntityType {
 
 
 #[derive(Debug, Args)]
-pub struct PrCommand {
+pub struct CreateBranchCommand {
     pub source: String,
     pub new_branch: String,
+}
+
+#[derive(Debug, Args)]
+pub struct UpdateBranchCommand {
+    /// Commit message
+    #[arg(short, long)]
+    pub message: String,
+    /// Target branch to be updated
+    #[arg(short, long)]
+    pub target_branch: String,
+    /// File path
+    #[arg(short, long)]
+    pub path: String,
+}
+
+#[derive(Debug, Args)]
+pub struct CreatePrCommand {
+    /// Pull request title
+    #[arg(short, long)]
+    pub title: String,
+    /// Pull request body message
+    #[arg(short, long)]
+    pub message: String,
+    /// Source branch (i.e. your current working branch)
+    #[arg(long)]
+    pub branch: String,
+    /// Target branch (i.e. branch to merge your pull request)
+    #[arg(long)]
+    pub target_branch: String,
 }
 
 #[derive(Debug, Args)]

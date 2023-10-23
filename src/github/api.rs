@@ -1,7 +1,8 @@
 use std::error::Error;
 use serde::Deserialize;
 use crate::github::init_headers::{init, MediaType};
-use base64::{Engine as _, engine::general_purpose};
+use crate::reader::read_file::read_file;
+use base64::{engine::general_purpose, Engine};
 
 type References = Vec<RefHead>;
 type Branches = Vec<Branch>;
@@ -85,7 +86,7 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
     Ok(())
 }
 
-pub fn list_all_branches() -> Result<(), Box<dyn Error>>{
+pub fn list_all_branches() -> Vec<String> {
     let repo_branch_list = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/branches");
 
     let headers = init(JSON);
@@ -97,25 +98,74 @@ pub fn list_all_branches() -> Result<(), Box<dyn Error>>{
         .expect("Something went wrong");
 
     let branches = res.json::<Branches>().expect("Maybe something went wrong");
+    let mut branch_names: Vec<String> = vec![];
 
     for branch in &branches {
-        println!("{:?}", branch.name);
+        branch_names.push(String::from(&branch.name));
     }
 
-    Ok(())
+    return branch_names;
 }
-fn update_file_in_branch(message: &str, target_branch: &str, content: String) -> Result<(), Box<dyn Error>> {
+
+pub fn update_file_in_branch(message: &str, target_branch: &str, path_to_content: String) -> Result<(), Box<dyn Error>> {
+    let repo_branch_list = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs/heads");
+    let mut headers = init(RAW);
+
+    let client = reqwest::blocking::Client::new();
+    let res = client.get(repo_branch_list)
+        .headers(headers)
+        .send()
+        .expect("Something went wrong");
+
+    let refs_heads = res.json::<References>().unwrap();
+
+    let target_value = format!("refs/heads/{}", &target_branch);
+    let mut get_branch = RefHead::default();
+    for heads in &refs_heads {
+        if heads.ref_name.eq(&target_value) {
+            get_branch = heads.to_owned();
+        }
+    }
+
+    if get_branch.object.sha.is_empty() {
+        return Err::<Result<(), Box<(dyn Error + 'static)>>, Box<dyn Error>>(Box::try_from("No branch has been found with this conditions").unwrap()).unwrap();
+    }
+
+    let content = read_file(&path_to_content);
     let headers = init(JSON);
-    let content_url = format!("https://api.github.com/repos/perkinelmer/srp-spotfire-addins/contents/packages.txt?ref={}", target_branch);
+    let content_url = "https://api.github.cm/repos/perkinelmer/srp-spotfire-addins/contents/packages.txt";
+
+    let encoded_content = general_purpose::STANDARD.encode(content);
+    let body = format!("{{\"message\":\"{}\",\"committer\":{{\"name\":\"Wagner Rosa\",\"email\":\"wagner.deoliveira@revvity.com\"}},\"content\":\"{}\",\"sha\": \"{}\",\"branch\":\"{}\" }}", message, encoded_content, get_branch.object.sha, target_branch);
+
+    println!("{:?}", &body);
 
     let client = reqwest::blocking::Client::new();
     let res = client.put(content_url)
         .headers(headers)
-        .body("{\"message\":\"my commit message\",\"committer\":{\"name\":\"Monalisa Octocat\",\"email\":\"octocat@github.com\"},\"content\":\"bXkgbmV3IGZpbGUgY29udGVudHM=\"}")
+        .body(body)
         .send()?;
+
+    println!("{:?}", res);
 
     Ok(())
 }
 
+pub fn create_pr(title: &str, body: &str, branch: &str, target_branch: &str) -> Result<(), Box<dyn Error>> {
+    let headers = init(JSON);
+    let pull_url = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/pulls";
 
+    let body = format!("{{\"title\":\"{}\",\"body\":\"{}\",\"head\":\"{}\", \"base\": \"{}\"}}", title, body, branch, target_branch);
+    println!("{}", body);
+
+    let client = reqwest::blocking::Client::new();
+    let res = client.post(pull_url)
+        .headers(headers)
+        .body(body)
+        .send()?;
+
+    println!("Status: {:?}", res.status());
+
+    Ok(())
+}
 

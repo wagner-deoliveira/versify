@@ -10,7 +10,8 @@ use args::VersifyArgs;
 use args::EntityType;
 use reader::read_file::read_file;
 use version_manager::replace_version::replace_version;
-use github::create_branch::{create_new_branch, list_all_branches};
+use github::api::{create_new_branch, list_all_branches};
+use crate::github::api::{create_pr, update_file_in_branch};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -22,9 +23,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         Make sure to enter the same number of domains and versions").unwrap(),
             )
         }
-        Some(EntityType::CreatePR(name)) => {
-            create_new_branch(&name.source, &name.new_branch).expect("Something went wrong");
-            Ok(())
+        Some(EntityType::CreateBranch(name)) => {
+            Ok(create_new_branch(&name.source, &name.new_branch).expect("Something went wrong"))
+        }
+        Some(EntityType::UpdateBranch(name)) => {
+            Ok(update_file_in_branch(&name.message, &name.target_branch, String::from(&name.path)).expect("Something went wrong"))
+        }
+        Some(EntityType::CreatePr(name)) => {
+            Ok(create_pr(&name.title, &name.message, &name.branch, &name.target_branch).expect("Something went wrong"))
         }
         Some(EntityType::Download(name)) => {
             match name.string {
@@ -70,7 +76,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             replace_version(&packages, version_mapping, output_path)
         }
         Some(EntityType::List(_)) => {
-            list_all_branches()
+            let list_branches = list_all_branches();
+            for branch in list_branches {
+                println!("{}", branch);
+            }
+            Ok(())
         }
     }
 }
