@@ -76,7 +76,7 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
         return Err::<Result<(), Box<(dyn Error + 'static)>>, Box<dyn Error>>(Box::try_from("No branch has been found with this conditions").unwrap()).unwrap();
     }
 
-    let body_post = format!("{{\"ref\": \"refs/heads/{}\", \"sha\": \"{}\"}}", branch_name, get_branch.object.sha);
+    let body_post = format!("{{\"ref\": \"refs/heads/{}\",\"sha\": \"{}\"}}", branch_name, get_branch.object.sha);
     client.post("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs")
         .headers(headers)
         .body(body_post)
@@ -132,7 +132,7 @@ pub fn update_file_in_branch(message: &str, target_branch: &str, path_to_content
     }
 
     let content = read_file(&path_to_content);
-    let headers = init(JSON);
+    headers = init(JSON);
     let content_url = "https://api.github.cm/repos/perkinelmer/srp-spotfire-addins/contents/packages.txt";
 
     let encoded_content = general_purpose::STANDARD.encode(content);
@@ -156,7 +156,6 @@ pub fn create_pr(title: &str, body: &str, branch: &str, target_branch: &str) -> 
     let pull_url = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/pulls";
 
     let body = format!("{{\"title\":\"{}\",\"body\":\"{}\",\"head\":\"{}\", \"base\": \"{}\"}}", title, body, branch, target_branch);
-    println!("{}", body);
 
     let client = reqwest::blocking::Client::new();
     let res = client.post(pull_url)
