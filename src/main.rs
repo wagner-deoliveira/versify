@@ -11,7 +11,7 @@ use args::EntityType;
 use reader::read_file::read_file;
 use version_manager::replace_version::replace_version;
 use github::api::{create_new_branch, list_all_branches};
-use crate::github::api::{create_pr, update_file_in_branch};
+use crate::github::api::{create_pr, download_package, update_file_in_branch};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -33,16 +33,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             Ok(create_pr(&name.title, &name.message, &name.branch, &name.target_branch).expect("Something went wrong"))
         }
         Some(EntityType::Download(name)) => {
-            match name.string {
-                Some(ref _name) => {
-                    println!("{:?}", _name);
-                    Ok(())
-                }
-                None => {
-                    println!("Provide a valid option to create a new domain");
-                    panic!("To be implemented")
-                }
+            let mut output_path = "tmp";
+            if let Some(output) = &name.output.as_deref() {
+                output_path = output;
             }
+            download_package(&name.branch, output_path).await
         }
         Some(EntityType::Update(name)) => {
             let domains = &name.domain;
@@ -59,6 +54,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 packages = read_file(&*path);
             }
 
+            if let Some(output) = &name.output.as_deref() {
+                output_path = output;
+            }
             if let Some(output) = &name.output.as_deref() {
                 output_path = output;
             }

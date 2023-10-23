@@ -1,8 +1,10 @@
 use std::error::Error;
+use std::fs;
 use serde::Deserialize;
 use crate::github::init_headers::{init, MediaType};
 use crate::reader::read_file::read_file;
 use base64::{engine::general_purpose, Engine};
+use crate::github::get_packages_from_github::get_packages;
 
 type References = Vec<RefHead>;
 type Branches = Vec<Branch>;
@@ -164,6 +166,16 @@ pub fn create_pr(title: &str, body: &str, branch: &str, target_branch: &str) -> 
         .send()?;
 
     println!("Status: {:?}", res.status());
+
+    Ok(())
+}
+
+pub async fn download_package(branch: &str, output_path: &str) -> Result<(), Box<dyn Error>> {
+    let file = get_packages(branch).await.expect("Failed to download package");
+    fs::create_dir_all(output_path)?;
+
+    let output_file_path = format!("{}/packages.txt", &output_path);
+    fs::write(output_file_path, file)?;
 
     Ok(())
 }

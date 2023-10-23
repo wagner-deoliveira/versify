@@ -61,7 +61,12 @@ pub struct CreatePrCommand {
 
 #[derive(Debug, Args)]
 pub struct DownloadCommand {
-    pub string: Option<String>,
+    /// Source branch (i.e. your current working branch)
+    #[arg(short, long)]
+    pub branch: String,
+    /// Choose the output directory. By default, it'll create a new directory called "output" in the current working directory
+    #[arg(short, long, value_name = "OUTPUT_PATH")]
+    pub output: Option<String>,
 }
 
 #[derive(Debug, Args)]
