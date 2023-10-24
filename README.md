@@ -21,7 +21,7 @@ The last step is to set the GITHUB_TOKEN variable in the .env file (rename the .
 Finally, to install the CLI tool to your path just run:
 
 ````bash
-cargo build && cargo install --path .
+cargo build --release && cargo install --path .
 ````
 
 That's it? Yes, now you can use the tool to modify the version of any application :cowboy_hat_face:
