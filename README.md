@@ -9,6 +9,15 @@ Create a pull request directly from the CLI itself!
 First, install the crustacean language [Rust](https://www.rust-lang.org/tools/install).  
 The next step is to clone the repository and then ``cd versify``.
 
+**Important**  
+You have to set a GitHub access token in order to use the CLI.
+Go to the [developer settings](https://github.com/settings/tokens) and then create a new GitHub access token (classic).    
+Give the token only the repository permissions and that should be enough.
+
+<img src="./assets/token_github.jpg" alt="Github access token creation">
+
+The last step is to set the GITHUB_TOKEN variable in the .env file (rename the .env.example). 
+
 Finally, to install the CLI tool to your path just run:
 
 ````bash
