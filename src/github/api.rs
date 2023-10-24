@@ -104,7 +104,7 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
         .send()?
         .text()?;
 
-    Ok(println!("Branch creaated: {}", &branch_name))
+    Ok(println!("Branch created: {}", &branch_name))
 }
 
 pub fn list_all_branches() -> Vec<String> {

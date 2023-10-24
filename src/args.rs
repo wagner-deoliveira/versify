@@ -11,7 +11,7 @@ pub struct VersifyArgs {
 pub enum EntityType {
     /// Create a new branch
     CreateBranch(CreateBranchCommand),
-    /// Create a pull request
+    /// Update the packages.txt in the repository
     UpdateBranch(UpdateBranchCommand),
     /// Create a pull request
     CreatePr(CreatePrCommand),
