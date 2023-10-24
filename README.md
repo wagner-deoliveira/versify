@@ -98,8 +98,7 @@ thrown.
 - -v, --version <BUILD_NUMBER>: The build number of the apps, e.g. 4.0.8.10268
 - -h, --help: Print help  
   <i>Optional</i>
-- -p, --path <PATH>: Path to the file directory (Only if you want to update a file in your PC instead of commiting the
-  changes directly to the repo)
+- -p, --path <PATH>: Path to the file directory (Only if you want to update the versions using a file in your PC instead of modifying directly in the repo)
 
 ### Create pull request
 
