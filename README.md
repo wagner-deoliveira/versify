@@ -12,7 +12,7 @@ The next step is to clone the repository and then ``cd versify``.
 **Important**  
 You have to set a GitHub access token in order to use the CLI.
 Go to the [developer settings](https://github.com/settings/tokens) and then create a new GitHub access token (classic).    
-Give the token only the repository permissions and that should be enough.
+Give the token only the repository and SSO permissions and that should be enough.
 
 <img src="./assets/token_github.jpg" alt="Github access token creation">
 
