@@ -16,7 +16,10 @@ Give the token only the repository and SSO permissions and that should be enough
 
 <img src="./assets/token_github.jpg" alt="Github access token creation">
 
-The last step is to set the GITHUB_TOKEN variable in the .env file (rename the .env.example). 
+The last step is to set the GITHUB_TOKEN variable in the .env file (rename the .env.example).  
+Also, to avoid errors like "token not found", add your token GITHUB_TOKEN to your system environment, then you'll be able to access the tool from anywhere in our PC.
+
+<img src="./assets/env_windows.jpg" alt="Windows environment config">
 
 Finally, to install the CLI tool to your path just run:
 
