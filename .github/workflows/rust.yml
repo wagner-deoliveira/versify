@@ -1,3 +1,4 @@
+name: Release job
 on:
   release:
     types: [created]
@@ -7,10 +8,15 @@ on:
 jobs:
  release:
    runs-on: ubuntu-latest
+   env:
+    git_token: ${{ secrets.GITHUB_TOKEN }}
    steps:
-     - uses: actions/checkout@v3
-     - uses: manoadamro/rust-release@v1
+     - name: Build release
+       uses: actions/checkout@v3
+       run: cargo build --release
+     - name: Release
+       uses: softprops/action-gh-release@v1
        with:
-         owner: ${{ github.repository_owner }}
-         repo: ${{ github.repository }}
-         token: ${{ secrets.GITHUB_TOKEN }}
+          files: target/release/versify.exe
+       env:
+          GITHUB_TOKEN: git_token
