@@ -4,11 +4,6 @@
 Now Versify works with commands to create a branch, update the file in the repository and... wait for it...  
 Create a pull request directly from the CLI itself!
 
-## How to install
-
-First, install the crustacean language [Rust](https://www.rust-lang.org/tools/install).  
-The next step is to clone the repository and then ``cd versify``.
-
 **Important**  
 You have to set a GitHub access token in order to use the CLI.
 Go to the [developer settings](https://github.com/settings/tokens) and then create a new GitHub access token (classic).    
@@ -16,17 +11,25 @@ Give the token only the repository and SSO permissions and that should be enough
 
 <img src="./assets/token_github.jpg" alt="Github access token creation">
 
-The last step is to set the GITHUB_TOKEN variable in the .env file (rename the .env.example).  
-Also, to avoid errors like "token not found", add your token GITHUB_TOKEN to your system environment, then you'll be able to access the tool from anywhere in our PC.
+Next, set the GITHUB_TOKEN as an environment variable in your system, then you'll be able to access the tool from anywhere in our PC.
 
 <img src="./assets/env_windows.jpg" alt="Windows environment config">
+
+## Running the compiled  version of the CLI
+If you don't want to install the tool from the source code, use the executable file located in the repository release folder and also add it to your path in the system environment.  
+
+## Installing from source code
+
+First, install the crustacean language [Rust](https://www.rust-lang.org/tools/install).  
+The next step is to clone the repository and then ``cd versify``.
+
+You may want to set the GITHUB_TOKEN by modifying the file .env.example (exclude .example locally), however if you already have set the GITHUB_TOKEN as a system environment varible, you can simply skip this step.
 
 Finally, to install the CLI tool to your path just run:
 
 ````bash
 cargo build --release && cargo install --path .
 ````
-
 That's it? Yes, now you can use the tool to modify the version of any application :cowboy_hat_face:
 
 ## Usage
