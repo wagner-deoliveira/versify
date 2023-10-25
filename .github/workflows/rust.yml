@@ -11,8 +11,9 @@ jobs:
    env:
     git_token: ${{ secrets.GITHUB_TOKEN }}
    steps:
-     - name: Build release
+     - name: Checkout code
        uses: actions/checkout@v3
+     - name: Build release
        run: cargo build --release
      - name: Release
        uses: softprops/action-gh-release@v1
