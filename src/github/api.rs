@@ -113,7 +113,7 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
     }
 
     let body_post = format!("{{\"ref\": \"refs/heads/{}\",\"sha\": \"{}\"}}", branch_name, get_branch.object.sha);
-    let url ="https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs";
+    let url = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs";
 
     ClientContainer::post_response(url, headers, body_post)?.text()?;
 
@@ -158,25 +158,24 @@ pub async fn download_package(branch: &str, output_path: &str) -> Result<(), Box
 pub fn update_file(message: &str, target_branch: &str, path_to_content: String) -> Result<(), Box<dyn Error>> {
     let content_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/contents/packages.txt?ref={}", target_branch);
     let headers = init(JSON);
-    let client = ClientContainer::new_client();
 
     let content = ClientContainer::get_response(&content_url, headers.clone())?.json::<Content>().unwrap();
     let file = read_file(&path_to_content);
     let encoded_content = general_purpose::STANDARD.encode(file);
     let body = format!("{{\"message\":\"{}\",\"committer\":{{\"name\":\"Wagner Rosa\",\"email\":\"wagner.deoliveira@revvity.com\"}},\"content\":\"{}\",\"sha\": \"{}\",\"branch\":\"{}\" }}", message, encoded_content, content.sha, target_branch);
 
-    let res = client.put(content_url)
-        .headers(headers)
-        .body(body)
-        .send()?;
+    let res = ClientContainer::put_response(
+        content_url.as_str(),
+        headers,
+        body,
+    );
 
-    Ok(println!("Status code: {}", res.status()))
+    Ok(println!("Status code: {}", res?.status()))
 }
 
 pub async fn update_file_in_branch(message: &str, target_branch: &str, map: HashMap<&str, &str>) -> Result<(), Box<dyn Error>> {
     let content_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/contents/packages.txt?ref={}", target_branch);
     let headers = init(JSON);
-    let client = ClientContainer::new_client();
 
     let content = ClientContainer::get_response(&content_url, headers.clone())?.json::<Content>().unwrap();
 
@@ -185,12 +184,9 @@ pub async fn update_file_in_branch(message: &str, target_branch: &str, map: Hash
     let encoded_content = general_purpose::STANDARD.encode(content_from_branch);
     let body = format!("{{\"message\":\"{}\",\"committer\":{{\"name\":\"Wagner Rosa\",\"email\":\"wagner.deoliveira@revvity.com\"}},\"content\":\"{}\",\"sha\": \"{}\",\"branch\":\"{}\" }}", message, encoded_content, content.sha, target_branch);
 
-    let res = client.put(content_url)
-        .headers(headers)
-        .body(body)
-        .send()?;
+    let res = ClientContainer::put_response(content_url.as_str(), headers, body);
 
-    Ok(println!("Status code: {}", res.status()))
+    Ok(println!("Status code: {}", res?.status()))
 }
 
 pub fn get_open_pull_requests() -> Vec<String> {
@@ -202,7 +198,7 @@ pub fn get_open_pull_requests() -> Vec<String> {
 
     if list_of_pulls_requests.is_empty() {
         pull_requests_info.push(format!("There are no pull requests open at this moment at {}", pull_url));
-        return pull_requests_info
+        return pull_requests_info;
     }
 
     let spacer = "-".repeat(70);
@@ -210,5 +206,5 @@ pub fn get_open_pull_requests() -> Vec<String> {
         pull_requests_info.push(format!("Pull request title: {:?}\nAuthor: {:?}\nurl: {:?}\nState: {:?}\nCreated at: {:?}\nUpdated at: {:?}\n{}\n", pull_request.title, pull_request.user.login, pull_request.html_url, pull_request.state, pull_request.created_at, pull_request.updated_at, spacer))
     }
 
-    return pull_requests_info
+    return pull_requests_info;
 }

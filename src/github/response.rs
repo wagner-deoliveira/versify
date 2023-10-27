@@ -27,4 +27,13 @@ impl ClientContainer {
 
         return Ok(res)
     }
+
+    pub fn put_response(url: &str, headers: HeaderMap, body: String) -> Result<Response, Box<dyn Error>> {
+        let res = ClientContainer::new_client().put(url)
+            .headers(headers)
+            .body(body)
+            .send()?;
+
+        return Ok(res)
+    }
 }
