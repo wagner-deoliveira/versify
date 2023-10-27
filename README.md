@@ -47,6 +47,7 @@ versify --help
 - create-branch: Create a new branch
 - update-branch: Update the package.txt in the created branch
 - create-pr: Create a new pull request
+- list-pr: List all the open pull requests
 - update: Update the package.txt in your current PC (TO BE DEPRECATED)
 
 To see the list of options for any command run ``versify <COMMAND> -h``
@@ -116,6 +117,18 @@ thrown.
 - --branch <BRANCH>: Source branch (i.e. your current working branch)
 - --target-branch <TARGET_BRANCH>: Target branch (i.e. the branch where the changes will be merged)
 - -h, --help: Print help
+
+### List pull requests
+````bash
+versify list-pr
+````
+It will return a list of pull requests with the following structure:  
+- Pull request title
+- Author
+- url
+- State
+- Created at
+- Updated at
 
 ### Update local packages.txt (To be deprecated in a future release)
 

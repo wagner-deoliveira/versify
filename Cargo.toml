@@ -1,6 +1,6 @@
 [package]
 name = "versify"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 authors = ["Wagner de Oliveira da Rosa"]
 description = "A simple CLI tool for managing the versions in packages.txt"

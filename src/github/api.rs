@@ -10,6 +10,7 @@ use crate::version_manager::replace_version::replace_version_in_repository;
 
 type References = Vec<RefHead>;
 type Branches = Vec<Branch>;
+type PullList = Vec<PullRequest>;
 
 #[derive(Default, Debug, Clone, PartialEq, Deserialize)]
 struct Object {
@@ -56,6 +57,25 @@ struct Content {
     content: String,
     encoding: String,
     _links: HashMap<String, String>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
+struct PullRequest {
+    html_url: String,
+    title: String,
+    user: User,
+    state: String,
+    body: String,
+    created_at: String,
+    updated_at: String,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
+struct User {
+    login: String,
+    id: i32,
+    node_id: String,
+    avatar_url: String,
 }
 
 trait Contains {
@@ -203,3 +223,28 @@ pub async fn update_file_in_branch(message: &str, target_branch: &str, map: Hash
     Ok(println!("Status code: {}", res.status()))
 }
 
+pub fn get_open_pull_requests() -> Vec<String> {
+    let pull_url = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/pulls";
+    let headers = init(JSON);
+
+    let client = reqwest::blocking::Client::new();
+    let res = client.get(pull_url)
+        .headers(headers.clone())
+        .send()
+        .expect("Something went wrong");
+
+    let list_of_pulls_requests = res.json::<PullList>().unwrap();
+    let mut pull_requests_info = Vec::new();
+
+    if list_of_pulls_requests.is_empty() {
+        pull_requests_info.push(format!("There are no pull requests open at this moment at {}", pull_url));
+        return pull_requests_info
+    }
+
+    let spacer = "-".repeat(70);
+    for pull_request in list_of_pulls_requests.iter() {
+        pull_requests_info.push(format!("Pull request title: {:?}\nAuthor: {:?}\nurl: {:?}\nState: {:?}\nCreated at: {:?}\nUpdated at: {:?}\n{}\n", pull_request.title, pull_request.user.login, pull_request.html_url, pull_request.state, pull_request.created_at, pull_request.updated_at, spacer))
+    }
+
+    return pull_requests_info
+}

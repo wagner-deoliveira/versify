@@ -11,7 +11,7 @@ use args::EntityType;
 use reader::read_file::read_file;
 use version_manager::replace_version::replace_version_to_file;
 use github::api::{create_new_branch, list_all_branches};
-use crate::github::api::{create_pr, download_package, update_file, update_file_in_branch};
+use crate::github::api::{create_pr, download_package, get_open_pull_requests, update_file, update_file_in_branch};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -98,6 +98,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let list_branches = list_all_branches();
             for branch in list_branches {
                 println!("{}", branch);
+            }
+            Ok(())
+        }
+        Some(EntityType::ListPr(_)) => {
+            let pr_list = get_open_pull_requests();
+            for pr in pr_list {
+                println!("{}", pr);
             }
             Ok(())
         }
