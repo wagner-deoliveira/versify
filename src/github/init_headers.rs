@@ -4,14 +4,12 @@ use reqwest::header::HeaderMap;
 
 pub enum MediaType {
     RAW,
-    HTML,
     JSON,
 }
 
 fn get_media_type(media_type: MediaType) -> &'static str {
     match media_type {
         MediaType::RAW => "application/vnd.github.raw",
-        MediaType::HTML => "application/vnd.github.html",
         MediaType::JSON => "application/vnd.github+json",
     }
 }

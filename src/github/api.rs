@@ -6,6 +6,7 @@ use crate::github::init_headers::{init, MediaType};
 use crate::reader::read_file::read_file;
 use base64::{engine::general_purpose, Engine};
 use crate::github::get_packages_from_github::get_packages;
+use crate::github::response::ClientContainer;
 use crate::version_manager::replace_version::replace_version_in_repository;
 
 type References = Vec<RefHead>;
@@ -95,13 +96,7 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
     let repo_branch_list = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs/heads");
     let mut headers = init(RAW);
 
-    let client = reqwest::blocking::Client::new();
-    let res = client.get(repo_branch_list)
-        .headers(headers)
-        .send()
-        .expect("Something went wrong");
-
-    let refs_heads = res.json::<References>().unwrap();
+    let refs_heads = ClientContainer::get_response(repo_branch_list.as_str(), headers)?.json::<References>().unwrap();
 
     let target_value = format!("refs/heads/{}", branch_source);
     let mut get_branch = RefHead::default();
@@ -118,27 +113,18 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
     }
 
     let body_post = format!("{{\"ref\": \"refs/heads/{}\",\"sha\": \"{}\"}}", branch_name, get_branch.object.sha);
-    client.post("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs")
-        .headers(headers)
-        .body(body_post)
-        .send()?
-        .text()?;
+    let url ="https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs";
+
+    ClientContainer::post_response(url, headers, body_post)?.text()?;
 
     Ok(println!("Branch created: {}", &branch_name))
 }
 
 pub fn list_all_branches() -> Vec<String> {
-    let repo_branch_list = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/branches");
-
+    let repo_branch_list = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/branches";
     let headers = init(JSON);
 
-    let client = reqwest::blocking::Client::new();
-    let res = client.get(repo_branch_list)
-        .headers(headers)
-        .send()
-        .expect("Something went wrong");
-
-    let branches = res.json::<Branches>().expect("Maybe something went wrong");
+    let branches = ClientContainer::get_response(repo_branch_list, headers).expect("Maybe something went wrong").json::<Branches>().unwrap();
     let mut branch_names: Vec<String> = vec![];
 
     for branch in &branches {
@@ -154,13 +140,9 @@ pub fn create_pr(title: &str, body: &str, branch: &str, target_branch: &str) -> 
 
     let body = format!("{{\"title\":\"{}\",\"body\":\"{}\",\"head\":\"{}\", \"base\": \"{}\"}}", title, body, branch, target_branch);
 
-    let client = reqwest::blocking::Client::new();
-    let res = client.post(pull_url)
-        .headers(headers)
-        .body(body)
-        .send()?;
+    let res = ClientContainer::post_response(pull_url, headers, body);
 
-    Ok(println!("Status code: {:?}", res.status()))
+    Ok(println!("Status code: {:?}", res?.status()))
 }
 
 pub async fn download_package(branch: &str, output_path: &str) -> Result<(), Box<dyn Error>> {
@@ -176,19 +158,13 @@ pub async fn download_package(branch: &str, output_path: &str) -> Result<(), Box
 pub fn update_file(message: &str, target_branch: &str, path_to_content: String) -> Result<(), Box<dyn Error>> {
     let content_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/contents/packages.txt?ref={}", target_branch);
     let headers = init(JSON);
+    let client = ClientContainer::new_client();
 
-    let client = reqwest::blocking::Client::new();
-    let res = client.get(&content_url)
-        .headers(headers.clone())
-        .send()
-        .expect("Something went wrong");
-
-    let content = res.json::<Content>().unwrap();
+    let content = ClientContainer::get_response(&content_url, headers.clone())?.json::<Content>().unwrap();
     let file = read_file(&path_to_content);
     let encoded_content = general_purpose::STANDARD.encode(file);
     let body = format!("{{\"message\":\"{}\",\"committer\":{{\"name\":\"Wagner Rosa\",\"email\":\"wagner.deoliveira@revvity.com\"}},\"content\":\"{}\",\"sha\": \"{}\",\"branch\":\"{}\" }}", message, encoded_content, content.sha, target_branch);
 
-    let client = reqwest::blocking::Client::new();
     let res = client.put(content_url)
         .headers(headers)
         .body(body)
@@ -200,21 +176,15 @@ pub fn update_file(message: &str, target_branch: &str, path_to_content: String) 
 pub async fn update_file_in_branch(message: &str, target_branch: &str, map: HashMap<&str, &str>) -> Result<(), Box<dyn Error>> {
     let content_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/contents/packages.txt?ref={}", target_branch);
     let headers = init(JSON);
+    let client = ClientContainer::new_client();
 
-    let client = reqwest::blocking::Client::new();
-    let res = client.get(&content_url)
-        .headers(headers.clone())
-        .send()
-        .expect("Something went wrong");
-
-    let content = res.json::<Content>().unwrap();
+    let content = ClientContainer::get_response(&content_url, headers.clone())?.json::<Content>().unwrap();
 
     let file = get_packages(&target_branch).await.expect("Failed to download package");
     let content_from_branch = replace_version_in_repository(file.as_str(), map);
     let encoded_content = general_purpose::STANDARD.encode(content_from_branch);
     let body = format!("{{\"message\":\"{}\",\"committer\":{{\"name\":\"Wagner Rosa\",\"email\":\"wagner.deoliveira@revvity.com\"}},\"content\":\"{}\",\"sha\": \"{}\",\"branch\":\"{}\" }}", message, encoded_content, content.sha, target_branch);
 
-    let client = reqwest::blocking::Client::new();
     let res = client.put(content_url)
         .headers(headers)
         .body(body)
@@ -227,13 +197,7 @@ pub fn get_open_pull_requests() -> Vec<String> {
     let pull_url = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/pulls";
     let headers = init(JSON);
 
-    let client = reqwest::blocking::Client::new();
-    let res = client.get(pull_url)
-        .headers(headers.clone())
-        .send()
-        .expect("Something went wrong");
-
-    let list_of_pulls_requests = res.json::<PullList>().unwrap();
+    let list_of_pulls_requests = ClientContainer::get_response(pull_url, headers).expect("Something wrong happened").json::<PullList>().unwrap();
     let mut pull_requests_info = Vec::new();
 
     if list_of_pulls_requests.is_empty() {
