@@ -21,6 +21,8 @@ pub enum EntityType {
     Update(UpdateCommand),
     /// List all branches of the repository
     List(ListCommand),
+   /// List all the currently open pull requests
+   ListPr(ListPrCommand),
 }
 
 
@@ -79,6 +81,9 @@ pub struct DownloadCommand {
 
 #[derive(Debug, Args)]
 pub struct ListCommand {}
+
+#[derive(Debug, Args)]
+pub struct ListPrCommand {}
 
 #[derive(Debug, Args)]
 pub struct UpdateCommand {
