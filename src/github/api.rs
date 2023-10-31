@@ -120,6 +120,14 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
     Ok(println!("Branch created: {}", &branch_name))
 }
 
+pub fn delete_branch(target_branch: &str) -> Result<(), Box<dyn Error>> {
+    let ref_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs/heads/{}", target_branch);
+    let headers = init(JSON);
+
+    ClientContainer::delete_response(ref_url.as_str(), headers).expect("Something went wrong");
+
+    Ok(println!("Branch deleted: {}", &target_branch))
+}
 pub fn list_all_branches() -> Vec<String> {
     let repo_branch_list = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/branches";
     let headers = init(JSON);

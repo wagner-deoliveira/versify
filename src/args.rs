@@ -11,6 +11,8 @@ pub struct VersifyArgs {
 pub enum EntityType {
     /// Create a new branch
     CreateBranch(CreateBranchCommand),
+    /// Delete a target branch
+    DeleteBranch(DeleteBranchCommand),
     /// Update the packages.txt in the repository
     UpdateBranch(UpdateBranchCommand),
     /// Create a pull request
@@ -21,8 +23,8 @@ pub enum EntityType {
     Update(UpdateCommand),
     /// List all branches of the repository
     List(ListCommand),
-   /// List all the currently open pull requests
-   ListPr(ListPrCommand),
+    /// List all the currently open pull requests
+    ListPr(ListPrCommand),
 }
 
 
@@ -67,6 +69,13 @@ pub struct CreatePrCommand {
     /// Target branch (i.e. branch to merge your pull request)
     #[arg(long)]
     pub target_branch: String,
+}
+
+#[derive(Debug, Args)]
+pub struct DeleteBranchCommand {
+    /// Branch to be deleted (the branch you have created)
+    #[arg(long)]
+    pub branch: String,
 }
 
 #[derive(Debug, Args)]
