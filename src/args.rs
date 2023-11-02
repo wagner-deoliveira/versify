@@ -25,7 +25,7 @@ pub enum EntityType {
     List(ListCommand),
     /// List all the currently open pull requests
     ListPr(ListPrCommand),
-    /// Close current open pull request
+    /// Close current open pull request. You should use the pull request number for this matter.
     ClosePr(ClosePrCommand),
 }
 
