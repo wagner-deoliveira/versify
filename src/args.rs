@@ -25,6 +25,8 @@ pub enum EntityType {
     List(ListCommand),
     /// List all the currently open pull requests
     ListPr(ListPrCommand),
+    /// Close current open pull request
+    ClosePr(ClosePrCommand),
 }
 
 
@@ -74,7 +76,6 @@ pub struct CreatePrCommand {
 #[derive(Debug, Args)]
 pub struct DeleteBranchCommand {
     /// Branch to be deleted (the branch you have created)
-    #[arg(long)]
     pub branch: String,
 }
 
@@ -93,6 +94,11 @@ pub struct ListCommand {}
 
 #[derive(Debug, Args)]
 pub struct ListPrCommand {}
+
+#[derive(Debug, Args)]
+pub struct ClosePrCommand {
+    pub pr_number: String
+}
 
 #[derive(Debug, Args)]
 pub struct UpdateCommand {

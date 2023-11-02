@@ -112,6 +112,11 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
         return Err::<Result<(), Box<(dyn Error + 'static)>>, Box<dyn Error>>(Box::try_from("No branch has been found with this conditions").unwrap()).unwrap();
     }
 
+    let branches = list_all_branches();
+    if branches.into_iter().any(|b| b.as_str().eq(branch_name)) {
+        return Ok(println!("There's already a branch called {}", branch_name))
+    };
+
     let body_post = format!("{{\"ref\": \"refs/heads/{}\",\"sha\": \"{}\"}}", branch_name, get_branch.object.sha);
     let url = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs";
 
@@ -124,10 +129,16 @@ pub fn delete_branch(target_branch: &str) -> Result<(), Box<dyn Error>> {
     let ref_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs/heads/{}", target_branch);
     let headers = init(JSON);
 
+    let branches = list_all_branches();
+    if !branches.into_iter().any(|b| b.as_str().eq(target_branch)) {
+        return Ok(println!("There's no branch called {}", target_branch))
+    };
+
     ClientContainer::delete_response(ref_url.as_str(), headers).expect("Something went wrong");
 
     Ok(println!("Branch deleted: {}", &target_branch))
 }
+
 pub fn list_all_branches() -> Vec<String> {
     let repo_branch_list = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/branches";
     let headers = init(JSON);
@@ -215,4 +226,15 @@ pub fn get_open_pull_requests() -> Vec<String> {
     }
 
     return pull_requests_info;
+}
+
+
+pub fn close_pr(pr_number: &str) -> Result<(), Box<dyn Error>> {
+    let headers = init(JSON);
+    let pr_number_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/pulls/{}", pr_number);
+    let body_close = "{\"state\": \"closed\"}";
+
+    let res = ClientContainer::patch_response(pr_number_url.as_str(), headers, String::from(body_close));
+
+    Ok(println!("Status code: {}", res?.status()))
 }
