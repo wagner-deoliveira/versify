@@ -220,7 +220,7 @@ pub fn get_open_pull_requests() -> Vec<String> {
         return pull_requests_info;
     }
 
-    let spacer = "-".repeat(70);
+    let spacer = "-".repeat(100);
     for pull_request in list_of_pulls_requests.iter() {
         pull_requests_info.push(format!("Pull request title: {:?}\nAuthor: {:?}\nurl: {:?}\nState: {:?}\nCreated at: {:?}\nUpdated at: {:?}\n{}\n", pull_request.title, pull_request.user.login, pull_request.html_url, pull_request.state, pull_request.created_at, pull_request.updated_at, spacer))
     }
