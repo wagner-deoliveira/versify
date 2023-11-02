@@ -129,6 +129,7 @@ BRANCH: Branch to be deleted
 - -h, --help: Print help
 
 ### List pull requests
+
 ````bash
 versify list-pr
 ````
