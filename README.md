@@ -46,8 +46,10 @@ versify --help
 - download: Download packages.txt
 - create-branch: Create a new branch
 - update-branch: Update the package.txt in the created branch
+- delete-branch: Delete a target branch
 - create-pr: Create a new pull request
 - list-pr: List all the open pull requests
+- close-pr: Close current open pull request. You should use the pull request number for this matter 
 - update: Update the package.txt in your current PC (TO BE DEPRECATED)
 
 To see the list of options for any command run ``versify <COMMAND> -h``
@@ -104,6 +106,14 @@ thrown.
   <i>Optional</i>
 - -p, --path <PATH>: Path to the file directory (Only if you want to update the versions using a file in your PC instead of modifying directly in the repo)
 
+### Delete a branch
+
+````bash
+ versify delete-branch <BRANCH> 
+````
+
+BRANCH: Branch to be deleted
+
 ### Create pull request
 
 ````bash
@@ -129,6 +139,14 @@ It will return a list of pull requests with the following structure:
 - State
 - Created at
 - Updated at
+
+### Close a specific pull request
+
+````bash
+ versify close-pr <PR_NUMBER> 
+````
+
+PR_NUMBER: Pull request number you want to close 
 
 ### Update local packages.txt (To be deprecated in a future release)
 

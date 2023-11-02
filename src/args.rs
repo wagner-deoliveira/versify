@@ -97,7 +97,8 @@ pub struct ListPrCommand {}
 
 #[derive(Debug, Args)]
 pub struct ClosePrCommand {
-    pub pr_number: String
+    /// Pull request number you want to close
+    pub pr_number: String,
 }
 
 #[derive(Debug, Args)]
