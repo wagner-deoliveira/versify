@@ -112,12 +112,31 @@ pub fn create_new_branch(branch_source: &str, branch_name: &str) -> Result<(), B
         return Err::<Result<(), Box<(dyn Error + 'static)>>, Box<dyn Error>>(Box::try_from("No branch has been found with this conditions").unwrap()).unwrap();
     }
 
+    let branches = list_all_branches();
+    if branches.into_iter().any(|b| b.as_str().eq(branch_name)) {
+        return Ok(println!("There's already a branch called {}", branch_name))
+    };
+
     let body_post = format!("{{\"ref\": \"refs/heads/{}\",\"sha\": \"{}\"}}", branch_name, get_branch.object.sha);
     let url = "https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs";
 
     ClientContainer::post_response(url, headers, body_post)?.text()?;
 
     Ok(println!("Branch created: {}", &branch_name))
+}
+
+pub fn delete_branch(target_branch: &str) -> Result<(), Box<dyn Error>> {
+    let ref_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/git/refs/heads/{}", target_branch);
+    let headers = init(JSON);
+
+    let branches = list_all_branches();
+    if !branches.into_iter().any(|b| b.as_str().eq(target_branch)) {
+        return Ok(println!("There's no branch called {}", target_branch))
+    };
+
+    ClientContainer::delete_response(ref_url.as_str(), headers).expect("Something went wrong");
+
+    Ok(println!("Branch deleted: {}", &target_branch))
 }
 
 pub fn list_all_branches() -> Vec<String> {
@@ -201,10 +220,27 @@ pub fn get_open_pull_requests() -> Vec<String> {
         return pull_requests_info;
     }
 
-    let spacer = "-".repeat(70);
+    let spacer = "-".repeat(100);
     for pull_request in list_of_pulls_requests.iter() {
         pull_requests_info.push(format!("Pull request title: {:?}\nAuthor: {:?}\nurl: {:?}\nState: {:?}\nCreated at: {:?}\nUpdated at: {:?}\n{}\n", pull_request.title, pull_request.user.login, pull_request.html_url, pull_request.state, pull_request.created_at, pull_request.updated_at, spacer))
     }
 
     return pull_requests_info;
+}
+
+
+pub fn close_pr(pr_number: &str) -> Result<(), Box<dyn Error>> {
+    let headers = init(JSON);
+    let pr_number_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/pulls/{}", pr_number);
+    let body_close = "{\"state\": \"closed\"}";
+
+    let prs = get_open_pull_requests();
+    if prs[0].starts_with("There are no pull requests") {
+        return Err(Box::try_from(prs[0].as_str()).unwrap());
+    }
+
+    let res = ClientContainer::patch_response(pr_number_url.as_str(), headers, String::from(body_close));
+
+    println!("{:?}", res);
+    Ok(println!("Status code: {}", res?.status()))
 }

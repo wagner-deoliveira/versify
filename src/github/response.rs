@@ -36,4 +36,22 @@ impl ClientContainer {
 
         return Ok(res)
     }
+
+    pub fn delete_response(url: &str, headers: HeaderMap) -> Result<Response, Box<dyn Error>> {
+        let res = ClientContainer::new_client().delete(url)
+            .headers(headers)
+            .send()?;
+
+        return Ok(res)
+    }
+
+    pub fn patch_response(url: &str, headers: HeaderMap, body:String) -> Result<Response, Box<dyn Error>> {
+        let res = ClientContainer::new_client().patch(url)
+            .headers(headers)
+            .body(body)
+            .send()?;
+
+        return Ok(res)
+
+    }
 }

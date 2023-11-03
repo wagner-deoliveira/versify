@@ -11,6 +11,8 @@ pub struct VersifyArgs {
 pub enum EntityType {
     /// Create a new branch
     CreateBranch(CreateBranchCommand),
+    /// Delete a target branch
+    DeleteBranch(DeleteBranchCommand),
     /// Update the packages.txt in the repository
     UpdateBranch(UpdateBranchCommand),
     /// Create a pull request
@@ -21,8 +23,10 @@ pub enum EntityType {
     Update(UpdateCommand),
     /// List all branches of the repository
     List(ListCommand),
-   /// List all the currently open pull requests
-   ListPr(ListPrCommand),
+    /// List all the currently open pull requests
+    ListPr(ListPrCommand),
+    /// Close current open pull request. You should use the pull request number for this matter.
+    ClosePr(ClosePrCommand),
 }
 
 
@@ -70,6 +74,12 @@ pub struct CreatePrCommand {
 }
 
 #[derive(Debug, Args)]
+pub struct DeleteBranchCommand {
+    /// Branch to be deleted (the branch you have created)
+    pub branch: String,
+}
+
+#[derive(Debug, Args)]
 pub struct DownloadCommand {
     /// Choose the branch in the repository. By default, it'll pull the packages.txt from main
     #[arg(short, long)]
@@ -84,6 +94,12 @@ pub struct ListCommand {}
 
 #[derive(Debug, Args)]
 pub struct ListPrCommand {}
+
+#[derive(Debug, Args)]
+pub struct ClosePrCommand {
+    /// Pull request number you want to close
+    pub pr_number: String,
+}
 
 #[derive(Debug, Args)]
 pub struct UpdateCommand {
