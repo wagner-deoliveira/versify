@@ -234,7 +234,13 @@ pub fn close_pr(pr_number: &str) -> Result<(), Box<dyn Error>> {
     let pr_number_url = format!("https://api.github.com/repos/PerkinElmer/srp-spotfire-addins/pulls/{}", pr_number);
     let body_close = "{\"state\": \"closed\"}";
 
+    let prs = get_open_pull_requests();
+    if prs[0].starts_with("There are no pull requests") {
+        return Err(Box::try_from(prs[0].as_str()).unwrap());
+    }
+
     let res = ClientContainer::patch_response(pr_number_url.as_str(), headers, String::from(body_close));
 
+    println!("{:?}", res);
     Ok(println!("Status code: {}", res?.status()))
 }
