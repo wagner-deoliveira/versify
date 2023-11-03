@@ -26,8 +26,8 @@ pub fn replace_version_to_file(file: &str, map: HashMap<&str, &str>, output_path
                         }
                     }
                 }
-                Err(ex) => {
-                    eprintln!("Some of the domains doesn't match a valid value, please check your configuration {:?}", ex);
+                Err(_) => {
+                    eprintln!("Some of the domains doesn't match a valid value, please check your configuration {:?}", app);
                     std::process::exit(1);
                 },
             }
